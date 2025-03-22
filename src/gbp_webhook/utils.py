@@ -37,7 +37,6 @@ def get_command_path() -> str:
     raise RuntimeError("Cannot locate exe path")
 
 
-
 def register_signal_handler(
     signalnum: int, handler: Callable[[int, FrameType | None], Any]
 ):
