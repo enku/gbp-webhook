@@ -2,12 +2,14 @@
 
 # pylint: disable=missing-docstring
 
+import sys
 import unittest
 from unittest import mock
 
 from gbp_webhook import handlers
 
 patch = mock.patch
+init_notify = handlers.init_notify
 
 
 def setUpModule():  # pylint: disable=invalid-name
@@ -37,3 +39,20 @@ class CreateNotificationBodyTests(unittest.TestCase):
         self.assertEqual(
             "babette has pushed build 1554", handlers.create_notification_body(build)
         )
+
+
+@patch.object(handlers.importlib, "import_module")
+@patch.object(handlers, "gi")
+class InitNotifyTests(unittest.TestCase):
+    def test(self, gi: mock.Mock, import_module: mock.Mock) -> None:
+        init_notify.cache_clear()
+
+        notify = init_notify()
+
+        import_module.assert_called_once_with("gi.repository.Notify")
+        self.assertEqual(import_module.return_value, notify)
+
+        notify.init.assert_called_once_with("Gentoo Build Publisher")
+        notify.set_app_icon.assert_called_once_with(handlers.ICON)
+
+        gi.require_version.assert_called_once_with("Notify", "0.7")
