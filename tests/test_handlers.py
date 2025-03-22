@@ -10,9 +10,15 @@ from gbp_webhook import handlers
 patch = mock.patch
 
 
-@patch.object(handlers, "Notify")
+def setUpModule():  # pylint: disable=invalid-name
+    p = patch.object(handlers, "init_notify")
+    unittest.addModuleCleanup(p.stop)
+    p.start()
+
+
 class BuildPulledTests(unittest.TestCase):
-    def test(self, notify: mock.Mock) -> None:
+    def test(self) -> None:
+        notify = handlers.init_notify()
         build = {"machine": "babette", "build_id": "1554"}
         event = {"name": "build_pulled", "machine": "babette", "data": {"build": build}}
 
