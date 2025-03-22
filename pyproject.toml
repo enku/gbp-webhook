@@ -1,0 +1,41 @@
+[project]
+name = "gbp-webhook"
+dynamic = ["version"]
+description = "gbp-notifications webhook server"
+authors = [
+    {name = "Albert Hopkins", email = "marduk@letterboxes.org"},
+]
+dependencies = ["flask>=3.1.0", "pygobject>=3.50.0", "gunicorn>=23.0.0", "jinja2>=3.1.6", "gbpcli>=2.5.0"]
+requires-python = ">=3.12"
+readme = "README.md"
+license = {text = "GPL3+"}
+
+[project.entry-points."gbp_webhook.handlers"]
+build_pulled = "gbp_webhook.handlers:build_pulled"
+
+[project.entry-points."gbpcli.subcommands"]
+webhook = "gbp_webhook.cli"
+
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
+
+
+[tool.pdm]
+distribution = true
+version = { source = "scm" }
+
+[tool.coverage.run]
+source = ["gbp_webhook"]
+omit = []
+
+[dependency-groups]
+dev = [
+    "black>=25.1.0",
+    "isort>=6.0.1",
+    "mypy>=1.15.0",
+    "pylint>=3.3.5",
+    "pygobject-stubs>=2.13.0",
+    "coverage>=7.7.1",
+    "nox>=2025.2.9",
+]

@@ -1,0 +1,11 @@
+[Unit]
+Description=gbp-notifications webhook responder
+Wants=dbus.socket
+After=dbus.socket
+
+[Service]
+EnvironmentFile={{ config_path }}
+ExecStart={{ gbp_path }} webhook serve $GBP_WEBHOOK_ARGS
+
+[Install]
+WantedBy=default.target
