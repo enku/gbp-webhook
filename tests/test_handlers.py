@@ -2,7 +2,6 @@
 
 # pylint: disable=missing-docstring
 
-import sys
 import unittest
 from unittest import mock
 
