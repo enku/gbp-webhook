@@ -2,6 +2,7 @@
 Description=gbp-notifications webhook responder
 Wants=dbus.socket
 After=dbus.socket
+After=graphical-session.target
 
 [Service]
 EnvironmentFile={{ config_path }}
