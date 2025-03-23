@@ -11,6 +11,7 @@ import gi
 from .types import Event
 
 ICON = os.environ.get("GBP_WEBHOOK_ICON") or "package-x-generic"
+APP_ICON = os.environ.get("GBP_WEBHOOK_APP_ICON", ICON)
 
 
 def build_pulled(event: Event) -> None:
@@ -36,6 +37,6 @@ def init_notify() -> ModuleType:
     gi.require_version("Notify", "0.7")
     notify = importlib.import_module("gi.repository.Notify")
     notify.init("Gentoo Build Publisher")
-    notify.set_app_icon(ICON)  # type: ignore
+    notify.set_app_icon(APP_ICON)  # type: ignore
 
     return notify
