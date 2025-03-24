@@ -16,11 +16,10 @@ APP_ICON = os.environ.get("GBP_WEBHOOK_APP_ICON", ICON)
 
 def build_pulled(event: Event) -> None:
     """build_pulled event handler"""
-    notify = init_notify()
     title = event["machine"]
     body = create_notification_body(event["data"]["build"])
-    notification = notify.Notification.new(title, body, ICON)
-    notification.show()
+
+    show_notification(title, body)
 
 
 def create_notification_body(build: dict[str, Any]) -> str:
@@ -29,6 +28,13 @@ def create_notification_body(build: dict[str, Any]) -> str:
     build_id: str = build["build_id"]
 
     return f"{machine} has pushed build {build_id}"
+
+
+def show_notification(title: str, body: str) -> None:
+    """Task to show a notification"""
+    notify = init_notify()
+    notification = notify.Notification.new(title, body, ICON)
+    notification.show()
 
 
 @cache
