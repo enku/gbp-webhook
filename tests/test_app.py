@@ -4,15 +4,15 @@
 import unittest
 from unittest import mock
 
-from gbp_webhook import app
+from gbp_webhook import app, handlers
 
 patch = mock.patch
 
 
 @patch.object(app, "PRE_SHARED_KEY", "our-little-secret")
-@patch("gbp_webhook.handlers.build_pulled")
+@patch.object(app, "executor")
 class WebhookTests(unittest.TestCase):
-    def test(self, build_pulled: mock.Mock) -> None:
+    def test(self, executor: mock.Mock) -> None:
         client = app.app.test_client()
         headers = {"X-Pre-Shared-Key": "our-little-secret"}
         build = {"machine": "babette", "build_id": "1554"}
@@ -24,7 +24,9 @@ class WebhookTests(unittest.TestCase):
         self.assertEqual(
             {"message": "Notification handled!", "status": "success"}, response.json
         )
-        build_pulled.assert_called_once_with(event)
+        executor.return_value.submit.assert_called_once_with(
+            handlers.build_pulled, event
+        )
 
     def test_invalid_key(self, build_pulled: mock.Mock) -> None:
         client = app.app.test_client()

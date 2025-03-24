@@ -1,7 +1,9 @@
 """gbp-webhook flask app"""
 
+import concurrent.futures as cf
 import importlib.metadata
 import os
+from functools import cache
 from typing import Any, Callable, cast
 
 from flask import Flask, Response, jsonify, request
@@ -30,6 +32,12 @@ def webhook() -> tuple[Response, int]:
     for entry_point in HANDLERS:
         if entry_point.name == event_name:
             handler: Callable[[Event], Any] = entry_point.load()
-            handler(event)
+            executor().submit(handler, event)
 
     return jsonify({"status": "success", "message": "Notification handled!"}), 200
+
+
+@cache
+def executor() -> cf.ThreadPoolExecutor:
+    """Create and return a ThreadPoolExecutor"""
+    return cf.ThreadPoolExecutor()
