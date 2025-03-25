@@ -6,6 +6,7 @@ import os
 import pathlib
 import signal
 import unittest
+from typing import Callable
 from unittest import mock
 
 from gbp_webhook import cli, utils
@@ -76,3 +77,51 @@ class RegisterSignalHandlerTests(unittest.TestCase):
 
         callback.assert_called_once_with(signal.SIGUSR1, mock.ANY)
         self.assertEqual(orig_handler, signal.getsignal(signal.SIGUSR1))
+
+
+@patch.object(utils.sp, "Popen")
+class ChildProcessTests(unittest.TestCase):
+    def test(self, popen: mock.Mock) -> None:
+        original_handlers = (
+            signal.getsignal(signal.SIGINT),
+            signal.getsignal(signal.SIGTERM),
+        )
+        with utils.ChildProcess() as children:
+            children.add(["echo", "hello world"])
+
+            popen.assert_called_once_with(["echo", "hello world"])
+            process = popen.return_value
+            process.wait.assert_not_called()
+
+        process.wait.assert_called_once_with()
+        process.kill.assert_not_called()
+
+        self.assertEqual(
+            original_handlers,
+            (
+                signal.getsignal(signal.SIGINT),
+                signal.getsignal(signal.SIGTERM),
+            ),
+        )
+
+    def test_when_signal_sent(self, popen: mock.Mock) -> None:
+        for signalnum in (signal.SIGINT, signal.SIGTERM):
+            with self.subTest(signalnum=signalnum):
+                popen.reset_mock()
+                process = popen.return_value
+                process.wait.side_effect = self.create_side_effect(signalnum)
+
+                with self.assertRaises(SystemExit):
+                    with utils.ChildProcess() as children:
+                        children.add(["echo", "hello world"])
+
+                    popen.assert_called_once_with(["echo", "hello world"])
+                    process = popen.return_value
+                    process.wait.assert_not_called()
+
+                process.wait.assert_called_once_with()
+                process.kill.assert_called_once_with()
+
+    @staticmethod
+    def create_side_effect(signalnum: int) -> Callable[[], None]:
+        return lambda: os.kill(os.getpid(), signalnum)

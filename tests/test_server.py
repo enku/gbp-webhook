@@ -75,9 +75,3 @@ class ServeTests(unittest.TestCase):
         self.assertEqual(2, add_process.call_count)
         for child in add_process.calls:
             child.kill.assert_called()
-
-
-class ShutdownTests(unittest.TestCase):
-    def test(self) -> None:
-        with self.assertRaises(SystemExit):
-            server.shutdown(signal.SIGTERM, None)

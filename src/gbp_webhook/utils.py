@@ -6,7 +6,7 @@ import subprocess as sp
 import sys
 from functools import wraps
 from types import FrameType
-from typing import Any, Callable, ParamSpec, Self, Sequence, TypeVar
+from typing import Any, Callable, NoReturn, ParamSpec, Self, Sequence, TypeVar
 
 from jinja2 import Environment, PackageLoader, select_autoescape
 
@@ -60,8 +60,14 @@ def register_signal_handler(
 class ChildProcess:
     """Context manager to start child processes and await them when exited"""
 
+    # Signals we catch while awaiting children
+    signals = (signal.SIGINT, signal.SIGTERM)
+
     def __init__(self) -> None:
         self._children: list[sp.Popen] = []
+        self.orig_handlers: list[
+            Callable[[int, FrameType | None], Any] | int | None
+        ] = []
 
     def add(self, args: Sequence[str]) -> sp.Popen:
         """Start and add a child process with the given args"""
@@ -69,9 +75,23 @@ class ChildProcess:
         self._children.append(sp.Popen(args))
         return self._children[-1]
 
+    def shutdown(self, *_args: Any) -> NoReturn:
+        """Kill children and exit"""
+        for child in self._children:
+            child.kill()
+
+        raise SystemExit(0)
+
     def __enter__(self) -> Self:
+        for signalnum in self.signals:
+            self.orig_handlers.append(signal.getsignal(signalnum))
+            signal.signal(signalnum, self.shutdown)
+
         return self
 
     def __exit__(self, *args: Any) -> None:
         for child in self._children:
             child.wait()
+
+        for signalnum, orig in zip(self.signals, self.orig_handlers):
+            signal.signal(signalnum, orig)
