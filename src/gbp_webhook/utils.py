@@ -6,7 +6,7 @@ import subprocess as sp
 import sys
 from functools import wraps
 from types import FrameType
-from typing import Any, Callable, ParamSpec, TypeVar
+from typing import Any, Callable, ParamSpec, Self, Sequence, TypeVar
 
 from jinja2 import Environment, PackageLoader, select_autoescape
 
@@ -57,6 +57,21 @@ def register_signal_handler(
     return wrapper
 
 
-def start_process(args: list[str]) -> sp.Popen:
-    """Start and return a process with the given args"""
-    return sp.Popen(args)
+class ChildProcess:
+    """Context manager to start child processes and await them when exited"""
+
+    def __init__(self) -> None:
+        self._children: list[sp.Popen] = []
+
+    def add(self, args: Sequence[str]) -> sp.Popen:
+        """Start and add a child process with the given args"""
+        # pylint: disable=consider-using-with
+        self._children.append(sp.Popen(args))
+        return self._children[-1]
+
+    def __enter__(self) -> Self:
+        return self
+
+    def __exit__(self, *args: Any) -> None:
+        for child in self._children:
+            child.wait()

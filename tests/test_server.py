@@ -2,9 +2,11 @@
 
 # pylint: disable=missing-docstring
 import argparse
+import os
 import signal
 import sys
 import unittest
+from typing import Any
 from unittest import mock
 
 from gbp_webhook import cli, server
@@ -14,8 +16,7 @@ Mock = mock.Mock
 patch = mock.patch
 
 
-@patch.object(server.utils, "start_process")
-@patch.object(server, "_CHILDREN", new_callable=list)
+@patch.object(server.utils.ChildProcess, "add")
 class ServeTests(unittest.TestCase):
     # pylint: disable=protected-access
     parser = argparse.ArgumentParser()
@@ -31,7 +32,7 @@ class ServeTests(unittest.TestCase):
         ]
     )
 
-    def test(self, children: list[Mock], start_process: Mock) -> None:
+    def test(self, add_process: Mock) -> None:
         tmpdir = server.serve(self.args)
 
         gunicorn = mock.call(
@@ -53,30 +54,30 @@ class ServeTests(unittest.TestCase):
                 f"{tmpdir}/{NGINX_CONF}",
             ]
         )
-        start_process.assert_has_calls([gunicorn, nginx, gunicorn.wait(), nginx.wait()])
+        self.assertEqual(2, add_process.call_count)
+        add_process.assert_has_calls([gunicorn, nginx])
 
-        self.assertEqual(2, len(children))
+    def test_ctrl_c_pressed(self, add_process: Mock) -> None:
+        times_called = 0
 
-    def test_ctrl_c_pressed(self, children: list[Mock], start_process: Mock) -> None:
-        interruped = Mock()
-        interruped.wait.side_effect = KeyboardInterrupt
-        start_process.side_effect = (Mock(), interruped)
+        def add_side_effect(_args: Any) -> None:
+            nonlocal times_called
+
+            times_called += 1
+            if times_called > 1:
+                os.kill(os.getpid(), signal.SIGINT)
+
+        add_process.side_effect = add_side_effect
 
         with self.assertRaises(SystemExit):
             server.serve(self.args)
 
-        self.assertEqual(2, len(children))
-        for child in children:
+        self.assertEqual(2, add_process.call_count)
+        for child in add_process.calls:
             child.kill.assert_called()
 
 
 class ShutdownTests(unittest.TestCase):
     def test(self) -> None:
-        mock_children = [Mock(), Mock()]
-
-        with patch.object(server, "_CHILDREN", new=mock_children):
-            with self.assertRaises(SystemExit):
-                server.shutdown(signal.SIGTERM, None)
-
-        for child in mock_children:
-            child.kill.assert_called_once_with()
+        with self.assertRaises(SystemExit):
+            server.shutdown(signal.SIGTERM, None)

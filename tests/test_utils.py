@@ -76,14 +76,3 @@ class RegisterSignalHandlerTests(unittest.TestCase):
 
         callback.assert_called_once_with(signal.SIGUSR1, mock.ANY)
         self.assertEqual(orig_handler, signal.getsignal(signal.SIGUSR1))
-
-
-@patch.object(utils.sp, "Popen")
-class StartProcessTests(unittest.TestCase):
-    def test(self, mock_popen: mock.Mock) -> None:
-        args = ["echo", "hello world"]
-
-        proc = utils.start_process(args)
-
-        mock_popen.assert_called_once_with(args)
-        self.assertEqual(mock_popen.return_value, proc)
