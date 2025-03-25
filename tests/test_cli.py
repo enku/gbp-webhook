@@ -20,6 +20,7 @@ class HanderTests(unittest.TestCase):
 
         cli.handler(args, mock.Mock(), mock.Mock())
 
+        # pylint: disable=no-member
         cli.ACTIONS["serve"].assert_called_once_with(args)
 
 
