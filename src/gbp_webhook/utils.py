@@ -4,7 +4,6 @@ import os
 import signal
 import subprocess as sp
 import sys
-from functools import wraps
 from types import FrameType
 from typing import Any, Callable, Iterable, NoReturn, ParamSpec, Self, TypeVar
 
@@ -35,26 +34,6 @@ def get_command_path() -> str:
         return os.path.abspath(path)
 
     raise RuntimeError("Cannot locate exe path")
-
-
-def register_signal_handler(
-    signalnum: int, handler: Callable[[int, FrameType | None], Any]
-):
-    """Decorator factory for registering a given signal with a handler"""
-
-    def wrapper(fn: Callable[P, Tr]):
-        @wraps(fn)
-        def wrapped(*args: P.args, **kwargs: P.kwargs) -> Tr:
-            original_handler = signal.getsignal(signalnum)
-            signal.signal(signalnum, handler)
-            try:
-                return fn(*args, **kwargs)
-            finally:
-                signal.signal(signalnum, original_handler)
-
-        return wrapped
-
-    return wrapper
 
 
 class ChildProcess:

@@ -64,21 +64,6 @@ class GetCommandPathTests(unittest.TestCase):
             utils.get_command_path()
 
 
-class RegisterSignalHandlerTests(unittest.TestCase):
-    def test(self) -> None:
-        orig_handler = signal.getsignal(signal.SIGUSR1)
-        callback = mock.Mock()
-
-        @utils.register_signal_handler(signal.SIGUSR1, callback)
-        def fun():
-            os.kill(os.getpid(), signal.SIGUSR1)
-
-        fun()
-
-        callback.assert_called_once_with(signal.SIGUSR1, mock.ANY)
-        self.assertEqual(orig_handler, signal.getsignal(signal.SIGUSR1))
-
-
 @patch.object(utils.sp, "Popen")
 class ChildProcessTests(unittest.TestCase):
     def test(self, popen: mock.Mock) -> None:
