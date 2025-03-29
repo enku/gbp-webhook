@@ -89,7 +89,7 @@ class ChildProcessTests(unittest.TestCase):
         with utils.ChildProcess() as children:
             children.add(["echo", "hello world"])
 
-            popen.assert_called_once_with(["echo", "hello world"])
+            popen.assert_called_once_with(("echo", "hello world"))
             process = popen.return_value
             process.wait.assert_not_called()
 

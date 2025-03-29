@@ -6,7 +6,7 @@ import subprocess as sp
 import sys
 from functools import wraps
 from types import FrameType
-from typing import Any, Callable, NoReturn, ParamSpec, Self, Sequence, TypeVar
+from typing import Any, Callable, Iterable, NoReturn, ParamSpec, Self, TypeVar
 
 from jinja2 import Environment, PackageLoader, select_autoescape
 
@@ -69,10 +69,10 @@ class ChildProcess:
             Callable[[int, FrameType | None], Any] | int | None
         ] = []
 
-    def add(self, args: Sequence[str]) -> sp.Popen:
+    def add(self, args: Iterable[str]) -> sp.Popen:
         """Start and add a child process with the given args"""
         # pylint: disable=consider-using-with
-        self._children.append(sp.Popen(args))
+        self._children.append(sp.Popen(tuple(args)))
         return self._children[-1]
 
     def shutdown(self, *_args: Any) -> NoReturn:
