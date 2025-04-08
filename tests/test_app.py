@@ -1,6 +1,7 @@
 """Tests for the gbp-webhook flask app"""
 
 # pylint: disable=missing-docstring
+import concurrent.futures as cf
 import unittest
 from unittest import mock
 
@@ -41,3 +42,12 @@ class WebhookTests(unittest.TestCase):
             {"message": "Invalid pre-shared key!", "status": "error"}, response.json
         )
         build_pulled.assert_not_called()
+
+
+class ExecutorTests(unittest.TestCase):
+    def test(self) -> None:
+        app.executor.cache_clear()
+
+        executor = app.executor()
+
+        self.assertIsInstance(executor, cf.ThreadPoolExecutor)
