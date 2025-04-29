@@ -114,3 +114,14 @@ Now it will start automatically when you log in.  To uninstall the service:
 ```sh
 gbp webhook uninstall
 ```
+
+## Environment Variables
+
+The following variables are read from `~/.config/gbp-webhook.conf`:
+
+- `GBP_WEBHOOK_PRE_SHARED_KEY`: as explained above, the pre-shared key
+  exchanged between Gentoo Build Publisher and gbp-webhook.
+- `GBP_WEBHOOK_NGINX`: If defined, this is the full path to the nginx
+  executable. The default is `/usr/sbin/nginx`.
+- `GBP_WEBHOOK_ARGS`: additional arguments to pass to `gbp-webhook`.
+  Run `gbp webhook --help` to see the available arguments.
