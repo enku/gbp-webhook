@@ -5,10 +5,11 @@ import signal
 import subprocess as sp
 import sys
 from types import FrameType
-from typing import Any, Callable, Iterable, NoReturn, Self
+from typing import Any, Callable, Iterable, NoReturn, Self, TypeAlias
 
 from jinja2 import Environment, PackageLoader, select_autoescape
 
+SignalHandler: TypeAlias = Callable[[int, FrameType | None], Any]
 _env = Environment(loader=PackageLoader("gbp_webhook"), autoescape=select_autoescape())
 
 
@@ -41,9 +42,7 @@ class ChildProcess:
 
     def __init__(self) -> None:
         self._children: list[sp.Popen] = []
-        self.orig_handlers: list[
-            Callable[[int, FrameType | None], Any] | int | None
-        ] = []
+        self.orig_handlers: list[SignalHandler | int | None] = []
 
     def add(self, args: Iterable[str]) -> sp.Popen:
         """Start and add a child process with the given args"""
