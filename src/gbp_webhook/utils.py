@@ -5,12 +5,9 @@ import signal
 import subprocess as sp
 import sys
 from types import FrameType
-from typing import Any, Callable, Iterable, NoReturn, ParamSpec, Self, TypeVar
+from typing import Any, Callable, Iterable, NoReturn, Self
 
 from jinja2 import Environment, PackageLoader, select_autoescape
-
-P = ParamSpec("P")
-Tr = TypeVar("Tr")
 
 _env = Environment(loader=PackageLoader("gbp_webhook"), autoescape=select_autoescape())
 
