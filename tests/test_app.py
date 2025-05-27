@@ -44,6 +44,27 @@ class WebhookTests(unittest.TestCase):
         build_pulled.assert_not_called()
 
 
+@mock.patch.object(app, "executor")
+class ScheduleHandlerTest(unittest.TestCase):
+    def test_true(self, executor: mock.Mock) -> None:
+        event = {"name": "build_pulled", "machine": "babette"}
+        entry_point = mock.Mock()
+        entry_point.name = "build_pulled"
+
+        self.assertIs(True, app.schedule_handler(entry_point, event))
+
+        handler = entry_point.load.return_value
+        executor.return_value.submit.assert_called_once_with(handler, event)
+
+    def test_false(self, executor: mock.Mock) -> None:
+        event = {"name": "build_pulled", "machine": "babette"}
+        entry_point = mock.Mock()
+        entry_point.name = "bogus"
+
+        self.assertIs(False, app.schedule_handler(entry_point, event))
+        executor.return_value.submit.assert_not_called()
+
+
 class ExecutorTests(unittest.TestCase):
     def test(self) -> None:
         app.executor.cache_clear()

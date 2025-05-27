@@ -22,19 +22,29 @@ app = Flask("webhook")
 def webhook() -> tuple[Response, int]:
     """Webhook responder"""
     headers = request.headers
+    event = cast(Event, request.json)
 
     if headers.get(PSK_HEADER) != PRE_SHARED_KEY:
         return jsonify({"status": "error", "message": "Invalid pre-shared key!"}), 403
 
-    event = cast(Event, request.json)
-    event_name = event["name"]
-
     for entry_point in HANDLERS:
-        if entry_point.name == event_name:
-            handler: Callable[[Event], Any] = entry_point.load()
-            executor().submit(handler, event)
+        schedule_handler(entry_point, event)
 
     return jsonify({"status": "success", "message": "Notification handled!"}), 200
+
+
+def schedule_handler(entry_point: importlib.metadata.EntryPoint, event: Event) -> bool:
+    """Schedule the EntryPoint on the event if the entrypoint is named for the event
+
+    Return True.
+    If the entry_point is not registered for the event return False.
+    """
+    if entry_point.name != event["name"]:
+        return False
+
+    handler: Callable[[Event], Any] = entry_point.load()
+    executor().submit(handler, event)
+    return True
 
 
 @cache
