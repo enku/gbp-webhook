@@ -16,7 +16,7 @@ Mock = mock.Mock
 patch = mock.patch
 
 
-@patch.object(server.utils.ChildProcess, "add")
+@patch.object(server.ChildProcess, "add")
 class ServeTests(unittest.TestCase):
     # pylint: disable=protected-access
     parser = argparse.ArgumentParser()
