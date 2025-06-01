@@ -72,7 +72,7 @@ class ChildProcessTests(unittest.TestCase):
             signal.getsignal(signal.SIGTERM),
         )
         with utils.ChildProcess() as children:
-            children.add(["echo", "hello world"])
+            children.add("echo", "hello world")
 
             popen.assert_called_once_with(("echo", "hello world"))
             process = popen.return_value

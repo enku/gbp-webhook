@@ -36,23 +36,19 @@ class ServeTests(unittest.TestCase):
         tmpdir = server.serve(self.args)
 
         gunicorn = mock.call(
-            [
-                sys.executable,
-                "-m",
-                "gunicorn",
-                "-b",
-                f"unix:{tmpdir}/gunicorn.sock",
-                server.APP,
-            ]
+            sys.executable,
+            "-m",
+            "gunicorn",
+            "-b",
+            f"unix:{tmpdir}/gunicorn.sock",
+            server.APP,
         )
         nginx = mock.call(
-            [
-                self.args.nginx,
-                "-e",
-                f"{tmpdir}/error.log",
-                "-c",
-                f"{tmpdir}/{NGINX_CONF}",
-            ]
+            self.args.nginx,
+            "-e",
+            f"{tmpdir}/error.log",
+            "-c",
+            f"{tmpdir}/{NGINX_CONF}",
         )
         self.assertEqual(2, add_process.call_count)
         add_process.assert_has_calls([gunicorn, nginx])
@@ -60,7 +56,7 @@ class ServeTests(unittest.TestCase):
     def test_ctrl_c_pressed(self, add_process: Mock) -> None:
         times_called = 0
 
-        def add_side_effect(_args: Any) -> None:
+        def add_side_effect(*_args: Any) -> None:
             nonlocal times_called
 
             times_called += 1

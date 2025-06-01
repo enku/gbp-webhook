@@ -20,9 +20,9 @@ def serve(options: Namespace) -> str:
         tmp_path = Path(tmpdir)
         socket = tmp_path / "gunicorn.sock"
 
-        procs.add([sys.executable, "-m", "gunicorn", "-b", f"unix:{socket}", APP])
+        procs.add(sys.executable, "-m", "gunicorn", "-b", f"unix:{socket}", APP)
         nginx_conf = tmp_path / NGINX_CONF
         nginx_conf.write_text(render_template(NGINX_CONF, home=tmpdir, options=options))
-        procs.add([options.nginx, "-e", f"{tmpdir}/error.log", "-c", f"{nginx_conf}"])
+        procs.add(options.nginx, "-e", f"{tmpdir}/error.log", "-c", f"{nginx_conf}")
 
     return tmpdir

@@ -5,7 +5,7 @@ import signal
 import subprocess as sp
 import sys
 from types import FrameType
-from typing import Any, Callable, Iterable, NoReturn, Self, TypeAlias
+from typing import Any, Callable, NoReturn, Self, TypeAlias
 
 from jinja2 import Environment, PackageLoader, select_autoescape
 
@@ -41,10 +41,10 @@ class ChildProcess:
         self._children: list[sp.Popen] = []
         self.orig_handlers: list[SignalHandler | int | None] = []
 
-    def add(self, args: Iterable[str]) -> sp.Popen:
+    def add(self, *args: str) -> sp.Popen:
         """Start and add a child process with the given args"""
         # pylint: disable=consider-using-with
-        self._children.append(sp.Popen(tuple(args)))
+        self._children.append(sp.Popen(args))
         return self._children[-1]
 
     def shutdown(self, *_args: Any) -> NoReturn:
