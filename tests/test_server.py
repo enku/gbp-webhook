@@ -44,11 +44,7 @@ class ServeTests(unittest.TestCase):
             server.APP,
         )
         nginx = mock.call(
-            self.args.nginx,
-            "-e",
-            f"{tmpdir}/error.log",
-            "-c",
-            f"{tmpdir}/{NGINX_CONF}",
+            self.args.nginx, "-e", f"{tmpdir}/error.log", "-c", f"{tmpdir}/{NGINX_CONF}"
         )
         self.assertEqual(2, add_process.call_count)
         add_process.assert_has_calls([gunicorn, nginx])

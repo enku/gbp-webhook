@@ -83,10 +83,7 @@ class ChildProcessTests(unittest.TestCase):
 
         self.assertEqual(
             original_handlers,
-            (
-                signal.getsignal(signal.SIGINT),
-                signal.getsignal(signal.SIGTERM),
-            ),
+            (signal.getsignal(signal.SIGINT), signal.getsignal(signal.SIGTERM)),
         )
 
     def test_when_signal_sent(self, popen: mock.Mock) -> None:

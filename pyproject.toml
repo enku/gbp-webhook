@@ -20,6 +20,8 @@ webhook = "gbp_webhook.cli"
 requires = ["pdm-backend"]
 build-backend = "pdm.backend"
 
+[tool.black]
+skip-magic-trailing-comma = true
 
 [tool.pdm]
 distribution = true
