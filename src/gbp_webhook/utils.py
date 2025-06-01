@@ -22,13 +22,10 @@ def render_template(name: str, **context) -> str:
 
 def get_command_path() -> str:
     """Return the path of the current command"""
-    arg0 = sys.argv[0]
-
-    if arg0.startswith("/"):
+    if (arg0 := sys.argv[0]).startswith("/"):
         return arg0
 
-    main = sys.modules["__main__"]
-    if path := getattr(main, "__file__", None):
+    if path := getattr(sys.modules["__main__"], "__file__", None):
         return os.path.abspath(path)
 
     raise RuntimeError("Cannot locate exe path")
