@@ -11,7 +11,10 @@ from .types import WEBHOOK_CONF
 
 
 def install(_args: argparse.Namespace) -> None:
-    """Install the systemd unit for the user"""
+    """Install the systemd unit for the user
+
+    No config file (gbp-webhook.conf) exists one will be installed as well.
+    """
     unit_dir = get_unit_dir()
     unit_dir.mkdir(parents=True, exist_ok=True)
     unit_path = unit_dir / "gbp-webhook.service"
