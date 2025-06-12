@@ -9,6 +9,8 @@ from typing import Iterable
 from . import utils
 from .types import WEBHOOK_CONF
 
+UNIT = "gbp-webhook.service"
+
 
 def install(_args: argparse.Namespace) -> None:
     """Install the systemd unit for the user
@@ -26,11 +28,8 @@ def install(_args: argparse.Namespace) -> None:
         config = utils.render_template(WEBHOOK_CONF, args=repr(args_str))
         config_path.write_text(config, encoding="utf8")
 
-    unit = utils.render_template(
-        "gbp-webhook.service",
-        gbp_path=utils.get_command_path(),
-        config_path=config_path,
-    )
+    exe = utils.get_command_path()
+    unit = utils.render_template(UNIT, gbp_path=exe, config_path=config_path)
     unit_path.write_text(unit, encoding="utf8")
 
 
