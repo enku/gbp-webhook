@@ -31,6 +31,13 @@ version = { source = "scm" }
 source = ["gbp_webhook"]
 omit = []
 
+[tool.pylint.master]
+load-plugins = "pylint.extensions.bad_builtin"
+bad-functions = "print"
+
+[tool.pylint.variables]
+init-import = "yes"
+
 [dependency-groups]
 dev = [
     "black>=25.1.0",
