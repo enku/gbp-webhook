@@ -1,6 +1,6 @@
 """Tests for the gbp_webhook.systemd module"""
 
-# pylint: disable=missing-docstring
+# pylint: disable=missing-docstring,unused-argument
 import pathlib
 import unittest
 from unittest import mock
@@ -28,16 +28,11 @@ MOCK_ARGV = [
 ]
 
 
-@given(lib.tmpdir, lib.config_path, lib.get_unit_dir)
+@given(lib.get_unit_dir, lib.get_config_path)
 @patch.object(systemd.sys, "argv", new=MOCK_ARGV)
-@patch.object(systemd, "get_config_path")
 class InstallTests(unittest.TestCase):
-    def test_without_config_file_existing(
-        self, get_config_path: Mock, fixtures: Fixtures
-    ) -> None:
-        config_path = fixtures.config_path
-        get_config_path.return_value = config_path
-
+    def test_without_config_file_existing(self, fixtures: Fixtures) -> None:
+        config_path = systemd.get_config_path()
         systemd.install(Mock())
 
         self.assertTrue(config_path.read_bytes().startswith(b"GBP_WEBHOOK_ARGS="))
@@ -45,11 +40,8 @@ class InstallTests(unittest.TestCase):
         unit = systemd.get_unit_dir().joinpath("gbp-webhook.service")
         self.assertTrue(unit.exists())
 
-    def test_with_config_file_existing(
-        self, get_config_path: Mock, fixtures: Fixtures
-    ) -> None:
-        config_path = fixtures.config_path
-        get_config_path.return_value = config_path
+    def test_with_config_file_existing(self, fixtures: Fixtures) -> None:
+        config_path = systemd.get_config_path()
         config_path.write_bytes(b"this is a test")
 
         systemd.install(Mock())
@@ -62,7 +54,6 @@ class InstallTests(unittest.TestCase):
 
 @given(lib.get_unit_dir)
 class UninstallTests(unittest.TestCase):
-    # pylint: disable=unused-argument
     def test(self, fixtures: Fixtures) -> None:
         unit = systemd.get_unit_dir().joinpath("gbp-webhook.service")
         unit.touch()

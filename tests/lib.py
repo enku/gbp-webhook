@@ -62,3 +62,10 @@ def get_unit_dir(fixtures: Fixtures, target: Module = systemd) -> FC[Mock]:
     with mock.patch.object(target, "get_unit_dir") as mock_obj:
         mock_obj.return_value = fixtures.unit_dir
         yield mock_obj
+
+
+@fixture(config_path)
+def get_config_path(fixtures: Fixtures, target: Module = systemd) -> FC[Mock]:
+    with mock.patch.object(target, "get_config_path") as mock_obj:
+        mock_obj.return_value = fixtures.config_path
+        yield mock_obj
