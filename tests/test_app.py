@@ -11,13 +11,11 @@ from gbp_webhook import app, handlers
 
 from . import lib
 
-patch = mock.patch
-
 
 @given(lib.pre_shared_key)
-@patch.object(app, "executor")
+@given(lib.executor)
 class WebhookTests(unittest.TestCase):
-    def test(self, executor: mock.Mock, fixtures: Fixtures) -> None:
+    def test(self, fixtures: Fixtures) -> None:
         client = app.app.test_client()
         headers = {"X-Pre-Shared-Key": fixtures.pre_shared_key}
         build = {"machine": "babette", "build_id": "1554"}
@@ -29,11 +27,11 @@ class WebhookTests(unittest.TestCase):
         self.assertEqual(
             {"message": "Notification handled!", "status": "success"}, response.json
         )
-        executor.return_value.submit.assert_called_once_with(
+        fixtures.executor.return_value.submit.assert_called_once_with(
             handlers.build_pulled, event
         )
 
-    def test_invalid_key(self, build_pulled: mock.Mock, fixtures: Fixtures) -> None:
+    def test_invalid_key(self, fixtures: Fixtures) -> None:
         client = app.app.test_client()
         headers = {"X-Pre-Shared-Key": fixtures.pre_shared_key + "xxx"}
         build = {"machine": "babette", "build_id": "1554"}
@@ -45,12 +43,12 @@ class WebhookTests(unittest.TestCase):
         self.assertEqual(
             {"message": "Invalid pre-shared key!", "status": "error"}, response.json
         )
-        build_pulled.assert_not_called()
+        fixtures.executor.assert_not_called()
 
 
-@mock.patch.object(app, "executor")
+@given(lib.executor)
 class ScheduleHandlerTest(unittest.TestCase):
-    def test_true(self, executor: mock.Mock) -> None:
+    def test_true(self, fixtures: Fixtures) -> None:
         event = {"name": "build_pulled", "machine": "babette"}
         entry_point = mock.Mock()
         entry_point.name = "build_pulled"
@@ -58,15 +56,15 @@ class ScheduleHandlerTest(unittest.TestCase):
         self.assertIs(True, app.schedule_handler(entry_point, event))
 
         handler = entry_point.load.return_value
-        executor.return_value.submit.assert_called_once_with(handler, event)
+        fixtures.executor.return_value.submit.assert_called_once_with(handler, event)
 
-    def test_false(self, executor: mock.Mock) -> None:
+    def test_false(self, fixtures: Fixtures) -> None:
         event = {"name": "build_pulled", "machine": "babette"}
         entry_point = mock.Mock()
         entry_point.name = "bogus"
 
         self.assertIs(False, app.schedule_handler(entry_point, event))
-        executor.return_value.submit.assert_not_called()
+        fixtures.executor.return_value.submit.assert_not_called()
 
 
 class ExecutorTests(unittest.TestCase):
