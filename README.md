@@ -125,3 +125,14 @@ The following variables are read from `~/.config/gbp-webhook.conf`:
   executable. The default is `/usr/sbin/nginx`.
 - `GBP_WEBHOOK_ARGS`: additional arguments to pass to `gbp-webhook`.
   Run `gbp webhook --help` to see the available arguments.
+
+
+## Plugins
+
+gbp-webhook has a plugin mechanism were the webhook can call arbitrary
+handlers. The following additional plugins are known to exist:
+
+| Plugin | Description |
+| ------ | ----------- |
+| [playsound](https://github.com/enku/gbp-webhook-playsound) | A plugin that plays a sound on build pulled events |
+| [tts](https://github.com/enku/gbp-webhook-tts) | A text-to-speech plugin to speak the name of a machine or machines when a build is pulled for that machine |
