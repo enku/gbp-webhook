@@ -79,3 +79,13 @@ def argv(_: Fixtures, argv: Sequence[str] | None = None) -> FC[list[str]]:
 
     with mock.patch.object(sys, "argv", new=argv):
         yield argv
+
+
+@fixture(tmpdir)
+def home(fixtures: Fixtures, target: Any = systemd.Path) -> FC[Path]:
+    with mock.patch.object(target, "home") as mock_obj:
+        path = Path(fixtures.tmpdir, "home")
+        path.mkdir()
+        mock_obj.return_value = path
+
+        yield path

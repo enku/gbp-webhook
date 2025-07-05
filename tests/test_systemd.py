@@ -63,17 +63,16 @@ class UninstallTests(unittest.TestCase):
         self.assertFalse(unit.exists())
 
 
+@given(lib.home)
 @patch.dict(systemd.os.environ, {}, clear=True)
 class GetUnitDirTests(unittest.TestCase):
-    @patch.object(systemd.Path, "home")
-    def test_without_xdg_data_home(self, home: Mock) -> None:
-        home.return_value = Path("/blah/blah")
-
+    def test_without_xdg_data_home(self, fixtures: Fixtures) -> None:
         path = systemd.get_unit_dir()
+        home = fixtures.home
 
-        self.assertEqual(Path("/blah/blah/.local/share/systemd/user"), path)
+        self.assertEqual(home.joinpath(".local/share/systemd/user"), path)
 
-    def test_with_xdg_data_home(self) -> None:
+    def test_with_xdg_data_home(self, fixtures: Fixtures) -> None:
         systemd.os.environ["XDG_DATA_HOME"] = "/path/to/ruin"
 
         path = systemd.get_unit_dir()
@@ -81,14 +80,13 @@ class GetUnitDirTests(unittest.TestCase):
         self.assertEqual(Path("/path/to/ruin/.local/share/systemd/user"), path)
 
 
-@patch.object(systemd.Path, "home")
+@given(lib.home)
 class GetConfigPathTests(unittest.TestCase):
-    def test(self, home: Mock) -> None:
-        home.return_value = Path("/path/to/ruin")
-
+    def test(self, fixtures: Fixtures) -> None:
         config_path = systemd.get_config_path()
+        home = fixtures.home
 
-        self.assertEqual(Path(f"/path/to/ruin/.config/{WEBHOOK_CONF}"), config_path)
+        self.assertEqual(home.joinpath(f".config/{WEBHOOK_CONF}"), config_path)
 
 
 class ArgsFromArgvTests(unittest.TestCase):
