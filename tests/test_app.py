@@ -5,17 +5,21 @@ import concurrent.futures as cf
 import unittest
 from unittest import mock
 
+from unittest_fixtures import Fixtures, given
+
 from gbp_webhook import app, handlers
+
+from . import lib
 
 patch = mock.patch
 
 
-@patch.object(app, "PRE_SHARED_KEY", "our-little-secret")
+@given(lib.pre_shared_key)
 @patch.object(app, "executor")
 class WebhookTests(unittest.TestCase):
-    def test(self, executor: mock.Mock) -> None:
+    def test(self, executor: mock.Mock, fixtures: Fixtures) -> None:
         client = app.app.test_client()
-        headers = {"X-Pre-Shared-Key": "our-little-secret"}
+        headers = {"X-Pre-Shared-Key": fixtures.pre_shared_key}
         build = {"machine": "babette", "build_id": "1554"}
         event = {"name": "build_pulled", "machine": "babette", "data": {"build": build}}
 
@@ -29,9 +33,9 @@ class WebhookTests(unittest.TestCase):
             handlers.build_pulled, event
         )
 
-    def test_invalid_key(self, build_pulled: mock.Mock) -> None:
+    def test_invalid_key(self, build_pulled: mock.Mock, fixtures: Fixtures) -> None:
         client = app.app.test_client()
-        headers = {"X-Pre-Shared-Key": "the-wrong-key"}
+        headers = {"X-Pre-Shared-Key": fixtures.pre_shared_key + "xxx"}
         build = {"machine": "babette", "build_id": "1554"}
         event = {"name": "build_pulled", "machine": "babette", "data": {"build": build}}
 

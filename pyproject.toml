@@ -47,4 +47,5 @@ dev = [
     "pygobject-stubs>=2.13.0",
     "coverage>=7.7.1",
     "nox>=2025.2.9",
+    "unittest-fixtures>=1.0.0",
 ]
