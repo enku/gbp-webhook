@@ -28,50 +28,43 @@ MOCK_ARGV = [
 ]
 
 
-@given(lib.tmpdir, lib.config_path, lib.unit_dir)
+@given(lib.tmpdir, lib.config_path, lib.get_unit_dir)
 @patch.object(systemd.sys, "argv", new=MOCK_ARGV)
-@patch.object(systemd, "get_unit_dir")
 @patch.object(systemd, "get_config_path")
 class InstallTests(unittest.TestCase):
     def test_without_config_file_existing(
-        self, get_config_path: Mock, get_unit_dir: Mock, fixtures: Fixtures
+        self, get_config_path: Mock, fixtures: Fixtures
     ) -> None:
         config_path = fixtures.config_path
-        unit_dir = fixtures.unit_dir
         get_config_path.return_value = config_path
-        get_unit_dir.return_value = unit_dir
 
         systemd.install(Mock())
 
         self.assertTrue(config_path.read_bytes().startswith(b"GBP_WEBHOOK_ARGS="))
 
-        unit = unit_dir / "gbp-webhook.service"
+        unit = systemd.get_unit_dir().joinpath("gbp-webhook.service")
         self.assertTrue(unit.exists())
 
     def test_with_config_file_existing(
-        self, get_config_path: Mock, get_unit_dir: Mock, fixtures: Fixtures
+        self, get_config_path: Mock, fixtures: Fixtures
     ) -> None:
         config_path = fixtures.config_path
-        unit_dir = fixtures.unit_dir
         get_config_path.return_value = config_path
         config_path.write_bytes(b"this is a test")
-        get_unit_dir.return_value = unit_dir
 
         systemd.install(Mock())
 
         self.assertEqual(b"this is a test", config_path.read_bytes())
 
-        unit = unit_dir / "gbp-webhook.service"
+        unit = systemd.get_unit_dir().joinpath("gbp-webhook.service")
         self.assertTrue(unit.exists())
 
 
-@given(lib.tmpdir)
-@patch.object(systemd, "get_unit_dir")
+@given(lib.get_unit_dir)
 class UninstallTests(unittest.TestCase):
-    def test(self, get_unit_dir: Mock, fixtures: Fixtures) -> None:
-        tmppath = Path(fixtures.tmpdir)
-        get_unit_dir.return_value = tmppath
-        unit = tmppath.joinpath("gbp-webhook.service")
+    # pylint: disable=unused-argument
+    def test(self, fixtures: Fixtures) -> None:
+        unit = systemd.get_unit_dir().joinpath("gbp-webhook.service")
         unit.touch()
 
         systemd.uninstall(Mock())

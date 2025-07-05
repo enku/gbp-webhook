@@ -6,7 +6,7 @@ from unittest import mock
 
 from unittest_fixtures import FixtureContext, Fixtures, fixture
 
-from gbp_webhook import app, server
+from gbp_webhook import app, server, systemd
 from gbp_webhook.types import WEBHOOK_CONF
 
 FC = FixtureContext
@@ -55,3 +55,10 @@ def config_path(fixtures: Fixtures, create: bool = True) -> Path:
         path.parent.mkdir()
 
     return path
+
+
+@fixture(unit_dir)
+def get_unit_dir(fixtures: Fixtures, target: Module = systemd) -> FC[Mock]:
+    with mock.patch.object(target, "get_unit_dir") as mock_obj:
+        mock_obj.return_value = fixtures.unit_dir
+        yield mock_obj
