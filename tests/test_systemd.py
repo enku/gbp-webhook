@@ -5,7 +5,7 @@ import pathlib
 import unittest
 from unittest import mock
 
-from unittest_fixtures import Fixtures, given
+from unittest_fixtures import Fixtures, given, where
 
 from gbp_webhook import systemd
 from gbp_webhook.types import WEBHOOK_CONF
@@ -28,8 +28,8 @@ MOCK_ARGV = [
 ]
 
 
-@given(lib.get_unit_dir, lib.get_config_path)
-@patch.object(systemd.sys, "argv", new=MOCK_ARGV)
+@given(lib.get_unit_dir, lib.get_config_path, lib.argv)
+@where(argv=MOCK_ARGV)
 class InstallTests(unittest.TestCase):
     def test_without_config_file_existing(self, fixtures: Fixtures) -> None:
         config_path = systemd.get_config_path()

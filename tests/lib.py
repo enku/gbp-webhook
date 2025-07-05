@@ -1,7 +1,9 @@
-# pylint: disable=missing-docstring
+# pylint: disable=missing-docstring,redefined-outer-name
+import sys
 import tempfile
 from pathlib import Path
 from types import ModuleType as Module
+from typing import Sequence
 from unittest import mock
 
 from unittest_fixtures import FixtureContext, Fixtures, fixture
@@ -69,3 +71,11 @@ def get_config_path(fixtures: Fixtures, target: Module = systemd) -> FC[Mock]:
     with mock.patch.object(target, "get_config_path") as mock_obj:
         mock_obj.return_value = fixtures.config_path
         yield mock_obj
+
+
+@fixture()
+def argv(_: Fixtures, argv: Sequence[str] | None = None) -> FC[list[str]]:
+    argv = ["gbp", "webhook", "serve"] if argv is None else list(argv)
+
+    with mock.patch.object(sys, "argv", new=argv):
+        yield argv
