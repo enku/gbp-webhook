@@ -1,11 +1,13 @@
 # pylint: disable=missing-docstring
 import tempfile
+from pathlib import Path
 from types import ModuleType as Module
 from unittest import mock
 
 from unittest_fixtures import FixtureContext, Fixtures, fixture
 
 from gbp_webhook import app, server
+from gbp_webhook.types import WEBHOOK_CONF
 
 FC = FixtureContext
 Mock = mock.Mock
@@ -33,3 +35,23 @@ def add_process(_: Fixtures) -> FC[Mock]:
 def tmpdir(_: Fixtures) -> FC[str]:
     with tempfile.TemporaryDirectory() as _tmpdir:
         yield _tmpdir
+
+
+@fixture(tmpdir)
+def unit_dir(fixtures: Fixtures, name: str = "unitz", create: bool = True) -> Path:
+    path = Path(fixtures.tmpdir, name)
+
+    if create:
+        path.mkdir()
+
+    return Path(fixtures.tmpdir, name)
+
+
+@fixture(tmpdir)
+def config_path(fixtures: Fixtures, create: bool = True) -> Path:
+    path = Path(fixtures.tmpdir, ".config", WEBHOOK_CONF)
+
+    if create:
+        path.parent.mkdir()
+
+    return path

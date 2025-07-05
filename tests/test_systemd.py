@@ -28,7 +28,7 @@ MOCK_ARGV = [
 ]
 
 
-@given(lib.tmpdir)
+@given(lib.tmpdir, lib.config_path, lib.unit_dir)
 @patch.object(systemd.sys, "argv", new=MOCK_ARGV)
 @patch.object(systemd, "get_unit_dir")
 @patch.object(systemd, "get_config_path")
@@ -36,7 +36,8 @@ class InstallTests(unittest.TestCase):
     def test_without_config_file_existing(
         self, get_config_path: Mock, get_unit_dir: Mock, fixtures: Fixtures
     ) -> None:
-        config_path, unit_dir = self.configure_paths(fixtures.tmpdir)
+        config_path = fixtures.config_path
+        unit_dir = fixtures.unit_dir
         get_config_path.return_value = config_path
         get_unit_dir.return_value = unit_dir
 
@@ -50,9 +51,9 @@ class InstallTests(unittest.TestCase):
     def test_with_config_file_existing(
         self, get_config_path: Mock, get_unit_dir: Mock, fixtures: Fixtures
     ) -> None:
-        config_path, unit_dir = self.configure_paths(fixtures.tmpdir)
+        config_path = fixtures.config_path
+        unit_dir = fixtures.unit_dir
         get_config_path.return_value = config_path
-        config_path.parent.mkdir()
         config_path.write_bytes(b"this is a test")
         get_unit_dir.return_value = unit_dir
 
@@ -62,13 +63,6 @@ class InstallTests(unittest.TestCase):
 
         unit = unit_dir / "gbp-webhook.service"
         self.assertTrue(unit.exists())
-
-    def configure_paths(self, tmpdir) -> tuple[Path, Path]:
-        tmp_path = Path(tmpdir)
-        config_path = tmp_path.joinpath(".config", WEBHOOK_CONF)
-        unit_dir = tmp_path / "unitz"
-
-        return config_path, unit_dir
 
 
 @given(lib.tmpdir)
