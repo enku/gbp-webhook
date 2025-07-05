@@ -9,14 +9,17 @@ import unittest
 from typing import Any
 from unittest import mock
 
+from unittest_fixtures import Fixtures, given
+
 from gbp_webhook import cli, server
 from gbp_webhook.types import NGINX_CONF
 
+from . import lib
+
 Mock = mock.Mock
-patch = mock.patch
 
 
-@patch.object(server.ChildProcess, "add")
+@given(lib.add_process)
 class ServeTests(unittest.TestCase):
     # pylint: disable=protected-access
     parser = argparse.ArgumentParser()
@@ -32,7 +35,7 @@ class ServeTests(unittest.TestCase):
         ]
     )
 
-    def test(self, add_process: Mock) -> None:
+    def test(self, fixtures: Fixtures) -> None:
         tmpdir = server.serve(self.args)
 
         gunicorn = mock.call(
@@ -46,10 +49,10 @@ class ServeTests(unittest.TestCase):
         nginx = mock.call(
             self.args.nginx, "-e", f"{tmpdir}/error.log", "-c", f"{tmpdir}/{NGINX_CONF}"
         )
-        self.assertEqual(2, add_process.call_count)
-        add_process.assert_has_calls([gunicorn, nginx])
+        self.assertEqual(2, fixtures.add_process.call_count)
+        fixtures.add_process.assert_has_calls([gunicorn, nginx])
 
-    def test_ctrl_c_pressed(self, add_process: Mock) -> None:
+    def test_ctrl_c_pressed(self, fixtures: Fixtures) -> None:
         times_called = 0
 
         def add_side_effect(*_args: Any) -> None:
@@ -59,11 +62,11 @@ class ServeTests(unittest.TestCase):
             if times_called > 1:
                 os.kill(os.getpid(), signal.SIGINT)
 
-        add_process.side_effect = add_side_effect
+        fixtures.add_process.side_effect = add_side_effect
 
         with self.assertRaises(SystemExit):
             server.serve(self.args)
 
-        self.assertEqual(2, add_process.call_count)
-        for child in add_process.calls:
+        self.assertEqual(2, fixtures.add_process.call_count)
+        for child in fixtures.add_process.calls:
             child.kill.assert_called()

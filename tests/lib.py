@@ -4,7 +4,7 @@ from unittest import mock
 
 from unittest_fixtures import FixtureContext, Fixtures, fixture
 
-from gbp_webhook import app
+from gbp_webhook import app, server
 
 FC = FixtureContext
 Mock = mock.Mock
@@ -19,4 +19,10 @@ def pre_shared_key(_: Fixtures, target: Module = app, key: str = "key") -> FC[st
 @fixture()
 def executor(_: Fixtures, target: Module = app) -> FC[Mock]:
     with mock.patch.object(target, "executor") as mock_obj:
+        yield mock_obj
+
+
+@fixture()
+def add_process(_: Fixtures) -> FC[Mock]:
+    with mock.patch.object(server.ChildProcess, "add") as mock_obj:
         yield mock_obj
