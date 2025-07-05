@@ -1,4 +1,5 @@
 # pylint: disable=missing-docstring
+import tempfile
 from types import ModuleType as Module
 from unittest import mock
 
@@ -26,3 +27,9 @@ def executor(_: Fixtures, target: Module = app) -> FC[Mock]:
 def add_process(_: Fixtures) -> FC[Mock]:
     with mock.patch.object(server.ChildProcess, "add") as mock_obj:
         yield mock_obj
+
+
+@fixture()
+def tmpdir(_: Fixtures) -> FC[str]:
+    with tempfile.TemporaryDirectory() as _tmpdir:
+        yield _tmpdir

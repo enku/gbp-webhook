@@ -2,12 +2,15 @@
 
 # pylint: disable=missing-docstring
 import pathlib
-import tempfile
 import unittest
 from unittest import mock
 
+from unittest_fixtures import Fixtures, given
+
 from gbp_webhook import systemd
 from gbp_webhook.types import WEBHOOK_CONF
+
+from . import lib
 
 Mock = mock.Mock
 Path = pathlib.Path
@@ -25,41 +28,40 @@ MOCK_ARGV = [
 ]
 
 
+@given(lib.tmpdir)
 @patch.object(systemd.sys, "argv", new=MOCK_ARGV)
 @patch.object(systemd, "get_unit_dir")
 @patch.object(systemd, "get_config_path")
 class InstallTests(unittest.TestCase):
     def test_without_config_file_existing(
-        self, get_config_path: Mock, get_unit_dir: Mock
+        self, get_config_path: Mock, get_unit_dir: Mock, fixtures: Fixtures
     ) -> None:
-        with tempfile.TemporaryDirectory() as tmpdir:
-            config_path, unit_dir = self.configure_paths(tmpdir)
-            get_config_path.return_value = config_path
-            get_unit_dir.return_value = unit_dir
+        config_path, unit_dir = self.configure_paths(fixtures.tmpdir)
+        get_config_path.return_value = config_path
+        get_unit_dir.return_value = unit_dir
 
-            systemd.install(Mock())
+        systemd.install(Mock())
 
-            self.assertTrue(config_path.read_bytes().startswith(b"GBP_WEBHOOK_ARGS="))
+        self.assertTrue(config_path.read_bytes().startswith(b"GBP_WEBHOOK_ARGS="))
 
-            unit = unit_dir / "gbp-webhook.service"
-            self.assertTrue(unit.exists())
+        unit = unit_dir / "gbp-webhook.service"
+        self.assertTrue(unit.exists())
 
     def test_with_config_file_existing(
-        self, get_config_path: Mock, get_unit_dir: Mock
+        self, get_config_path: Mock, get_unit_dir: Mock, fixtures: Fixtures
     ) -> None:
-        with tempfile.TemporaryDirectory() as tmpdir:
-            config_path, unit_dir = self.configure_paths(tmpdir)
-            get_config_path.return_value = config_path
-            config_path.parent.mkdir()
-            config_path.write_bytes(b"this is a test")
-            get_unit_dir.return_value = unit_dir
+        config_path, unit_dir = self.configure_paths(fixtures.tmpdir)
+        get_config_path.return_value = config_path
+        config_path.parent.mkdir()
+        config_path.write_bytes(b"this is a test")
+        get_unit_dir.return_value = unit_dir
 
-            systemd.install(Mock())
+        systemd.install(Mock())
 
-            self.assertEqual(b"this is a test", config_path.read_bytes())
+        self.assertEqual(b"this is a test", config_path.read_bytes())
 
-            unit = unit_dir / "gbp-webhook.service"
-            self.assertTrue(unit.exists())
+        unit = unit_dir / "gbp-webhook.service"
+        self.assertTrue(unit.exists())
 
     def configure_paths(self, tmpdir) -> tuple[Path, Path]:
         tmp_path = Path(tmpdir)
@@ -69,18 +71,18 @@ class InstallTests(unittest.TestCase):
         return config_path, unit_dir
 
 
+@given(lib.tmpdir)
 @patch.object(systemd, "get_unit_dir")
 class UninstallTests(unittest.TestCase):
-    def test(self, get_unit_dir: Mock) -> None:
-        with tempfile.TemporaryDirectory() as tmpdir:
-            tmppath = Path(tmpdir)
-            get_unit_dir.return_value = tmppath
-            unit = tmppath.joinpath("gbp-webhook.service")
-            unit.touch()
+    def test(self, get_unit_dir: Mock, fixtures: Fixtures) -> None:
+        tmppath = Path(fixtures.tmpdir)
+        get_unit_dir.return_value = tmppath
+        unit = tmppath.joinpath("gbp-webhook.service")
+        unit.touch()
 
-            systemd.uninstall(Mock())
+        systemd.uninstall(Mock())
 
-            self.assertFalse(unit.exists())
+        self.assertFalse(unit.exists())
 
 
 @patch.dict(systemd.os.environ, {}, clear=True)
