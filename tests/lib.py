@@ -1,9 +1,10 @@
 # pylint: disable=missing-docstring,redefined-outer-name
+import os
 import sys
 import tempfile
 from pathlib import Path
 from types import ModuleType as Module
-from typing import Sequence
+from typing import Any, Sequence
 from unittest import mock
 
 from unittest_fixtures import FixtureContext, Fixtures, fixture
@@ -89,3 +90,11 @@ def home(fixtures: Fixtures, target: Any = systemd.Path) -> FC[Path]:
         mock_obj.return_value = path
 
         yield path
+
+
+@fixture()
+def environ(
+    _: Fixtures, clear: bool = True, environ: dict[str, str] | None = None
+) -> FC[None]:
+    with mock.patch.dict(os.environ, environ or {}, clear=clear):
+        yield

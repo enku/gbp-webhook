@@ -1,6 +1,7 @@
 """Tests for the gbp_webhook.systemd module"""
 
 # pylint: disable=missing-docstring,unused-argument
+import os
 import pathlib
 import unittest
 from unittest import mock
@@ -14,7 +15,6 @@ from . import lib
 
 Mock = mock.Mock
 Path = pathlib.Path
-patch = mock.patch
 
 MOCK_ARGV = [
     "gbp",
@@ -63,8 +63,7 @@ class UninstallTests(unittest.TestCase):
         self.assertFalse(unit.exists())
 
 
-@given(lib.home)
-@patch.dict(systemd.os.environ, {}, clear=True)
+@given(lib.home, lib.environ)
 class GetUnitDirTests(unittest.TestCase):
     def test_without_xdg_data_home(self, fixtures: Fixtures) -> None:
         path = systemd.get_unit_dir()
@@ -73,7 +72,7 @@ class GetUnitDirTests(unittest.TestCase):
         self.assertEqual(home.joinpath(".local/share/systemd/user"), path)
 
     def test_with_xdg_data_home(self, fixtures: Fixtures) -> None:
-        systemd.os.environ["XDG_DATA_HOME"] = "/path/to/ruin"
+        os.environ["XDG_DATA_HOME"] = "/path/to/ruin"
 
         path = systemd.get_unit_dir()
 
