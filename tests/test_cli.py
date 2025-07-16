@@ -1,9 +1,11 @@
 """Tests for gbp-webhook cli"""
 
-# pylint: disable=missing-docstring
+# pylint: disable=missing-docstring,unused-argument
 
 import argparse
+import io
 import unittest
+from contextlib import redirect_stdout
 from typing import Any, Callable, TypeAlias
 from unittest import mock
 
@@ -35,6 +37,18 @@ class HandlerTests(unittest.TestCase):
 
         actions = fixtures.cli_actions
         actions["serve"].assert_called_once_with(args)
+
+    def test_list_plugins(self, fixtures: Fixtures) -> None:
+        parser = argparse.ArgumentParser()
+        cli.parse_args(parser)
+        args = parser.parse_args(["list-plugins"])
+        stdout = io.StringIO()
+
+        with redirect_stdout(stdout):
+            status = cli.handler(args, mock.Mock(), mock.Mock())
+
+        self.assertEqual(0, status)
+        self.assertEqual("gbp_webhook.handlers:build_pulled\n", stdout.getvalue())
 
 
 class ParseArgsTests(unittest.TestCase):

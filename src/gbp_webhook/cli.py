@@ -1,6 +1,7 @@
 """gbp-webhook command-line interface"""
 
 import argparse
+import importlib.metadata
 import os
 from typing import TYPE_CHECKING
 
@@ -22,6 +23,7 @@ Depending on the action:
   - serve: run the webhook server
   - install: install the systemd unit file
   - remove: the systemd unit file
+  - list-plugins: print a list of registered webhook handlers
 """
 DEFAULT_NGINX = os.environ.get("GBP_WEBHOOK_NGINX") or "/usr/sbin/nginx"
 
@@ -51,3 +53,14 @@ def parse_args(parser: argparse.ArgumentParser) -> None:
         default=DEFAULT_NGINX,
         help="Path to the nginx executable. default: %(default)s",
     )
+
+
+def list_plugins(_args: argparse.Namespace) -> None:
+    """Action to print the list of plugins (handlers)"""
+    handlers = importlib.metadata.entry_points(group="gbp_webhook.handlers")
+
+    for entry_point in handlers:
+        print(entry_point.value)  # pylint: disable=bad-builtin
+
+
+ACTIONS["list-plugins"] = list_plugins
