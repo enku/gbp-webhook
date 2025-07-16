@@ -20,8 +20,8 @@ HELP = """The gbp-webhook server
 Depending on the action:
 
   - serve: run the webhook server
-  - install install the systemd unit file
-  - remove the systemd unit file
+  - install: install the systemd unit file
+  - remove: the systemd unit file
 """
 DEFAULT_NGINX = os.environ.get("GBP_WEBHOOK_NGINX") or "/usr/sbin/nginx"
 

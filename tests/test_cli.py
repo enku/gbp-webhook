@@ -25,7 +25,7 @@ def cli_actions(
 
 @given(cli_actions)
 @where(cli_actions={"serve": mock.Mock()})
-class HanderTests(unittest.TestCase):
+class HandlerTests(unittest.TestCase):
     def test(self, fixtures: Fixtures) -> None:
         parser = argparse.ArgumentParser()
         cli.parse_args(parser)
