@@ -22,14 +22,12 @@ app = Flask("webhook")
 def webhook() -> tuple[Response, int]:
     """Webhook responder"""
     headers = request.headers
-    event = cast(Event, request.json)
 
-    if headers.get(PSK_HEADER) != PRE_SHARED_KEY:
-        return response("error", "Invalid pre-shared key!"), 403
+    if headers.get(PSK_HEADER) == PRE_SHARED_KEY:
+        handle_event(cast(Event, request.json))
+        return response("success", "Notification handled!"), 200
 
-    handle_event(event)
-
-    return response("success", "Notification handled!"), 200
+    return response("error", "Invalid pre-shared key!"), 403
 
 
 def handle_event(event: Event) -> None:
