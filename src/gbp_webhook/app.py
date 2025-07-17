@@ -25,12 +25,12 @@ def webhook() -> tuple[Response, int]:
     event = cast(Event, request.json)
 
     if headers.get(PSK_HEADER) != PRE_SHARED_KEY:
-        return jsonify({"status": "error", "message": "Invalid pre-shared key!"}), 403
+        return response("error", "Invalid pre-shared key!"), 403
 
     for entry_point in HANDLERS:
         schedule_handler(entry_point, event)
 
-    return jsonify({"status": "success", "message": "Notification handled!"}), 200
+    return response("success", "Notification handled!"), 200
 
 
 def schedule_handler(entry_point: importlib.metadata.EntryPoint, event: Event) -> bool:
@@ -45,6 +45,11 @@ def schedule_handler(entry_point: importlib.metadata.EntryPoint, event: Event) -
     handler: Callable[[Event], Any] = entry_point.load()
     executor().submit(handler, event)
     return True
+
+
+def response(status: str, message: str) -> Response:
+    """Return a JSON response given the status and message"""
+    return jsonify({"status": status, "message": message})
 
 
 @cache
