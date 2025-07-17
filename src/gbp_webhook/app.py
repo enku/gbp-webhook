@@ -34,22 +34,14 @@ def webhook() -> tuple[Response, int]:
 
 def handle_event(event: Event) -> None:
     """Schedule the given event to the event handlers"""
-    for entry_point in HANDLERS:
+    for entry_point in [ep for ep in HANDLERS if ep.name == event["name"]]:
         schedule_handler(entry_point, event)
 
 
-def schedule_handler(entry_point: importlib.metadata.EntryPoint, event: Event) -> bool:
-    """Schedule the EntryPoint on the event if the entrypoint is named for the event
-
-    Return True.
-    If the entry_point is not registered for the event return False.
-    """
-    if entry_point.name != event["name"]:
-        return False
-
+def schedule_handler(entry_point: importlib.metadata.EntryPoint, event: Event) -> None:
+    """Schedule the EntryPoint on the event if the entrypoint is named for the event"""
     handler: Callable[[Event], Any] = entry_point.load()
     executor().submit(handler, event)
-    return True
 
 
 def response(status: str, message: str) -> Response:

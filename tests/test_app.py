@@ -46,25 +46,32 @@ class WebhookTests(unittest.TestCase):
         fixtures.executor.assert_not_called()
 
 
+class HandleEventTests(unittest.TestCase):
+    def test_schedules_named_events(self) -> None:
+        entry_points = [mock_entry_point("build_pulled") for _ in range(3)]
+        entry_points.append(published := mock_entry_point("build_published"))
+        event = {"name": "build_pulled", "machine": "babette"}
+
+        with mock.patch.object(app, "HANDLERS", new=entry_points):
+            app.handle_event(event)
+
+        for entry_point in entry_points[:3]:
+            entry_point.load.assert_called_once_with()
+            handler = entry_point.load.return_value
+            handler.assert_called_once_with(event)
+        published.load.assert_not_called()
+
+
 @given(lib.executor)
 class ScheduleHandlerTest(unittest.TestCase):
-    def test_true(self, fixtures: Fixtures) -> None:
+    def test(self, fixtures: Fixtures) -> None:
         event = {"name": "build_pulled", "machine": "babette"}
-        entry_point = mock.Mock()
-        entry_point.name = "build_pulled"
+        entry_point = mock_entry_point("build_pulled")
 
-        self.assertIs(True, app.schedule_handler(entry_point, event))
+        app.schedule_handler(entry_point, event)
 
         handler = entry_point.load.return_value
         fixtures.executor.return_value.submit.assert_called_once_with(handler, event)
-
-    def test_false(self, fixtures: Fixtures) -> None:
-        event = {"name": "build_pulled", "machine": "babette"}
-        entry_point = mock.Mock()
-        entry_point.name = "bogus"
-
-        self.assertIs(False, app.schedule_handler(entry_point, event))
-        fixtures.executor.return_value.submit.assert_not_called()
 
 
 class ExecutorTests(unittest.TestCase):
@@ -74,3 +81,10 @@ class ExecutorTests(unittest.TestCase):
         executor = app.executor()
 
         self.assertIsInstance(executor, cf.ThreadPoolExecutor)
+
+
+def mock_entry_point(event: str) -> mock.Mock:
+    entry_point = mock.Mock()
+    entry_point.name = event
+
+    return entry_point
