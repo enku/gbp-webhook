@@ -27,10 +27,15 @@ def webhook() -> tuple[Response, int]:
     if headers.get(PSK_HEADER) != PRE_SHARED_KEY:
         return response("error", "Invalid pre-shared key!"), 403
 
-    for entry_point in HANDLERS:
-        schedule_handler(entry_point, event)
+    handle_event(event)
 
     return response("success", "Notification handled!"), 200
+
+
+def handle_event(event: Event) -> None:
+    """Schedule the given event to the event handlers"""
+    for entry_point in HANDLERS:
+        schedule_handler(entry_point, event)
 
 
 def schedule_handler(entry_point: importlib.metadata.EntryPoint, event: Event) -> bool:
