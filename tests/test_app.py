@@ -46,8 +46,11 @@ class WebhookTests(unittest.TestCase):
         fixtures.executor.assert_not_called()
 
 
+@given(lib.executor)
 class HandleEventTests(unittest.TestCase):
-    def test_schedules_named_events(self) -> None:
+    def test_schedules_named_events(self, fixtures: Fixtures) -> None:
+        executor = fixtures.executor.return_value
+        executor.submit.side_effect = lambda handler, event: handler(event)
         entry_points = [mock_entry_point("build_pulled") for _ in range(3)]
         entry_points.append(published := mock_entry_point("build_published"))
         event = {"name": "build_pulled", "machine": "babette"}
