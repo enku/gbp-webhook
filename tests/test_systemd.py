@@ -86,12 +86,3 @@ class GetConfigPathTests(unittest.TestCase):
         home = fixtures.home
 
         self.assertEqual(home.joinpath(f".config/{WEBHOOK_CONF}"), config_path)
-
-
-class ArgsFromArgvTests(unittest.TestCase):
-    def test(self) -> None:
-        args = systemd.args_from_argv(MOCK_ARGV)
-
-        self.assertEqual(
-            "--nginx /usr/local/bin/nginx --allow 10.10.10.0/24 fe80::/10", args
-        )

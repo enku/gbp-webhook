@@ -5,7 +5,7 @@ import signal
 import subprocess as sp
 import sys
 from types import FrameType
-from typing import Any, Callable, NoReturn, Self, TypeAlias
+from typing import Any, Callable, Iterable, NoReturn, Self, TypeAlias
 
 from jinja2 import Environment, PackageLoader, select_autoescape
 
@@ -67,3 +67,16 @@ class ChildProcess:
 
         for signalnum, orig in zip(self.signals, self.orig_handlers):
             signal.signal(signalnum, orig)
+
+
+def remove_from_lst(lst: Iterable[str], items: Iterable[str]) -> list[str]:
+    """Return a list containing lst with the (first occurrence of) items removed"""
+    lst = list(lst)
+
+    for item in items:
+        try:
+            lst.remove(item)
+        except ValueError:
+            pass
+
+    return lst

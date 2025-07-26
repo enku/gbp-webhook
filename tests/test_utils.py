@@ -112,3 +112,34 @@ class ChildProcessTests(unittest.TestCase):
     @staticmethod
     def create_side_effect(signalnum: int) -> Callable[[], None]:
         return lambda: os.kill(os.getpid(), signalnum)
+
+
+class RemoveFromLstTests(unittest.TestCase):
+    def test(self) -> None:
+        lst = [
+            "webhook",
+            "install",
+            "--nginx",
+            "/usr/local/bin/nginx",
+            "--allow",
+            "10.10.10.0/24",
+            "fe80::/10",
+        ]
+
+        args = utils.remove_from_lst(lst, ["webhook", "install"])
+
+        self.assertEqual(
+            [
+                "--nginx",
+                "/usr/local/bin/nginx",
+                "--allow",
+                "10.10.10.0/24",
+                "fe80::/10",
+            ],
+            args,
+        )
+
+    def test_list_does_not_contain_item(self) -> None:
+        args = utils.remove_from_lst(["gbp", "ls", "babette"], ["webhook", "install"])
+
+        self.assertEqual(["gbp", "ls", "babette"], args)

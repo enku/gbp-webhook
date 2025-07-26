@@ -4,7 +4,6 @@ import argparse
 import os
 import sys
 from pathlib import Path
-from typing import Iterable
 
 from . import utils
 from .types import WEBHOOK_CONF
@@ -24,7 +23,7 @@ def install(_args: argparse.Namespace) -> None:
     config_path.parent.mkdir(exist_ok=True)
 
     if not config_path.exists():
-        args_str = args_from_argv(sys.argv)
+        args_str = " ".join(utils.remove_from_lst(sys.argv[1:], ("webhook", "install")))
         config = utils.render_template(WEBHOOK_CONF, args=repr(args_str))
         config_path.write_text(config, encoding="utf8")
 
@@ -53,13 +52,3 @@ def get_unit_dir() -> Path:
 def get_config_path() -> Path:
     """Return the path of the config file"""
     return Path.home().joinpath(".config", WEBHOOK_CONF)
-
-
-def args_from_argv(argv: Iterable[str]) -> str:
-    """Convert argv list to a string, removing "gbp webhook install"."""
-    argv = list(argv)[1:]
-
-    argv.remove("webhook")
-    argv.remove("install")
-
-    return " ".join(argv)
