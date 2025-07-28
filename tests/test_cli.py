@@ -25,13 +25,19 @@ def cli_actions(
         yield mock_obj
 
 
-@given(cli_actions)
+@fixture()
+def parser_fixture(_: Fixtures) -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser()
+    cli.parse_args(parser)
+
+    return parser
+
+
+@given(cli_actions, parser_fixture)
 @where(cli_actions={"serve": mock.Mock()})
 class HandlerTests(unittest.TestCase):
     def test(self, fixtures: Fixtures) -> None:
-        parser = argparse.ArgumentParser()
-        cli.parse_args(parser)
-        args = parser.parse_args(["-p", "6000", "serve", "--allow", "0.0.0.0"])
+        args = fixtures.parser.parse_args(["-p", "6000", "serve", "--allow", "0.0.0.0"])
 
         cli.handler(args, mock.Mock(), mock.Mock())
 
@@ -39,9 +45,7 @@ class HandlerTests(unittest.TestCase):
         actions["serve"].assert_called_once_with(args)
 
     def test_list_plugins(self, fixtures: Fixtures) -> None:
-        parser = argparse.ArgumentParser()
-        cli.parse_args(parser)
-        args = parser.parse_args(["list-plugins"])
+        args = fixtures.parser.parse_args(["list-plugins"])
         stdout = io.StringIO()
 
         with redirect_stdout(stdout):
