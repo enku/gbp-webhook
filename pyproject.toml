@@ -16,6 +16,10 @@ build_pulled = "gbp_webhook.handlers:build_pulled"
 [project.entry-points."gbpcli.subcommands"]
 webhook = "gbp_webhook.cli"
 
+[project.urls]
+homepage = "https://github.com/enku/gbp-webhook"
+repository = "https://github.com/enku/gbp-webhook"
+
 [build-system]
 requires = ["pdm-backend"]
 build-backend = "pdm.backend"
