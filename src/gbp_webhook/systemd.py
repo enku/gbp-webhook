@@ -20,13 +20,25 @@ def install(_args: argparse.Namespace) -> None:
     unit_dir.mkdir(parents=True, exist_ok=True)
     unit_path = unit_dir / "gbp-webhook.service"
     config_path = get_config_path()
-
-    if not config_path.exists():
-        install_config(config_path)
-
     exe = utils.get_command_path()
     unit = utils.render_template(UNIT, gbp_path=exe, config_path=config_path)
+
+    maybe_install_config(config_path)
     unit_path.write_text(unit, encoding="utf8")
+
+
+def maybe_install_config(config_path: Path) -> bool:
+    """Write config to config_path if it doesn't already exist
+
+    If the config was written return True.
+    Otherwise return False.
+    """
+    if config_path.exists():
+        return False
+
+    install_config(config_path)
+
+    return True
 
 
 def install_config(config_path: Path):
