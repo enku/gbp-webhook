@@ -52,6 +52,22 @@ class InstallTests(unittest.TestCase):
         self.assertTrue(unit.exists())
 
 
+@given(lib.get_config_path, lib.argv)
+@where(argv=MOCK_ARGV)
+class InstallConfigTests(unittest.TestCase):
+    def test(self, fixtures: Fixtures) -> None:
+        config_path = systemd.get_config_path()
+
+        systemd.install_config(config_path)
+
+        self.assertTrue(config_path.is_file())
+        content = config_path.read_text("UTF-8")
+        self.assertEqual(
+            content,
+            "GBP_WEBHOOK_ARGS='--nginx /usr/local/bin/nginx --allow 10.10.10.0/24 fe80::/10'",
+        )
+
+
 @given(lib.get_unit_dir)
 class UninstallTests(unittest.TestCase):
     def test(self, fixtures: Fixtures) -> None:

@@ -20,16 +20,21 @@ def install(_args: argparse.Namespace) -> None:
     unit_dir.mkdir(parents=True, exist_ok=True)
     unit_path = unit_dir / "gbp-webhook.service"
     config_path = get_config_path()
-    config_path.parent.mkdir(exist_ok=True)
 
     if not config_path.exists():
-        args_str = " ".join(utils.remove_from_lst(sys.argv[1:], ("webhook", "install")))
-        config = utils.render_template(WEBHOOK_CONF, args=repr(args_str))
-        config_path.write_text(config, encoding="utf8")
+        install_config(config_path)
 
     exe = utils.get_command_path()
     unit = utils.render_template(UNIT, gbp_path=exe, config_path=config_path)
     unit_path.write_text(unit, encoding="utf8")
+
+
+def install_config(config_path: Path):
+    """Install the gbp-webhook.conf file given the path"""
+    config_path.parent.mkdir(exist_ok=True)
+    args_str = " ".join(utils.remove_from_lst(sys.argv[1:], ("webhook", "install")))
+    config = utils.render_template(WEBHOOK_CONF, args=repr(args_str))
+    config_path.write_text(config, encoding="utf8")
 
 
 def uninstall(_args: argparse.Namespace) -> None:
