@@ -5,7 +5,7 @@ import signal
 import subprocess as sp
 import sys
 from types import FrameType
-from typing import Any, Callable, Iterable, NoReturn, Self, TypeAlias
+from typing import Any, Callable, Iterable, NoReturn, Self, Sequence, TypeAlias
 
 from jinja2 import Environment, PackageLoader, select_autoescape
 
@@ -20,9 +20,12 @@ def render_template(name: str, **context) -> str:
     return template.render(**context)
 
 
-def get_command_path() -> str:
+def get_command_path(argv: Sequence[str] | None = None) -> str:
     """Return the path of the current command"""
-    if (arg0 := sys.argv[0]).startswith("/"):
+    if argv is None:
+        argv = sys.argv
+
+    if (arg0 := argv[0]).startswith("/"):
         return arg0
 
     if path := getattr(sys.modules["__main__"], "__file__", None):

@@ -9,12 +9,8 @@ import unittest
 from typing import Callable
 from unittest import mock
 
-from unittest_fixtures import Fixtures, given, where
-
 from gbp_webhook import cli, utils
 from gbp_webhook.types import NGINX_CONF
-
-from . import lib
 
 TESTDIR = pathlib.Path(__file__).parent
 patch = mock.patch
@@ -43,30 +39,22 @@ class RenderTemplateTests(unittest.TestCase):
         self.assertEqual(expected, result)
 
 
-@given(lib.argv)
-@where(argv=[])
 class GetCommandPathTests(unittest.TestCase):
-    def test_argv0(self, fixtures: Fixtures) -> None:
-        fixtures.argv.extend(["/usr/local/bin/gbp", "webhook", "serve"])
-
-        path = utils.get_command_path()
+    def test_argv0(self) -> None:
+        path = utils.get_command_path(["/usr/local/bin/gbp", "webhook", "serve"])
 
         self.assertEqual("/usr/local/bin/gbp", path)
 
     @patch.dict(utils.sys.modules, {"__main__": mock.Mock(__file__="/sbin/gbp")})
-    def test_argv1_does_not_start_with_slash(self, fixtures: Fixtures) -> None:
-        fixtures.argv.extend(["gbp", "webhook", "serve"])
-
-        path = utils.get_command_path()
+    def test_argv1_does_not_start_with_slash(self) -> None:
+        path = utils.get_command_path(["gbp", "webhook", "serve"])
 
         self.assertEqual("/sbin/gbp", path)
 
     @patch.dict(utils.sys.modules, {"__main__": mock.Mock()})
-    def test_main_has_no_dunder_file(self, fixtures: Fixtures) -> None:
-        fixtures.argv.extend(["gbp", "webhook", "serve"])
-
+    def test_main_has_no_dunder_file(self) -> None:
         with self.assertRaises(RuntimeError):
-            utils.get_command_path()
+            utils.get_command_path(["gbp", "webhook", "serve"])
 
 
 @patch.object(utils.sp, "Popen")
