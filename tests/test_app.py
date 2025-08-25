@@ -10,12 +10,11 @@ from unittest_fixtures import Fixtures, given, where
 
 from gbp_webhook import app, handlers
 
-from . import lib
 
-
-@given(lib.executor, pre_shared_key=testkit.patch)
+@given(executor=testkit.patch, pre_shared_key=testkit.patch)
 @where(pre_shared_key__target="gbp_webhook.app.PRE_SHARED_KEY")
 @where(pre_shared_key__new="key")
+@where(executor__target="gbp_webhook.app.executor")
 class WebhookTests(unittest.TestCase):
     def test(self, fixtures: Fixtures) -> None:
         client = app.app.test_client()
@@ -48,7 +47,8 @@ class WebhookTests(unittest.TestCase):
         fixtures.executor.assert_not_called()
 
 
-@given(lib.executor)
+@given(executor=testkit.patch)
+@where(executor__target="gbp_webhook.app.executor")
 class HandleEventTests(unittest.TestCase):
     def test_schedules_named_events(self, fixtures: Fixtures) -> None:
         executor = fixtures.executor.return_value
@@ -67,7 +67,8 @@ class HandleEventTests(unittest.TestCase):
         published.load.assert_not_called()
 
 
-@given(lib.executor)
+@given(executor=testkit.patch)
+@where(executor__target="gbp_webhook.app.executor")
 class ScheduleHandlerTest(unittest.TestCase):
     def test(self, fixtures: Fixtures) -> None:
         event = {"name": "build_pulled", "machine": "babette"}

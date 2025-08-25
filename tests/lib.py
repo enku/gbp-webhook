@@ -9,17 +9,11 @@ from unittest import mock
 
 from unittest_fixtures import FixtureContext, Fixtures, fixture
 
-from gbp_webhook import app, server, systemd
+from gbp_webhook import server, systemd
 from gbp_webhook.types import WEBHOOK_CONF
 
 FC = FixtureContext
 Mock = mock.Mock
-
-
-@fixture()
-def executor(_: Fixtures, target: Module = app) -> FC[Mock]:
-    with mock.patch.object(target, "executor") as mock_obj:
-        yield mock_obj
 
 
 @fixture()
