@@ -9,6 +9,7 @@ import unittest
 from typing import Callable
 from unittest import mock
 
+import gbp_testkit.fixtures as testkit
 from unittest_fixtures import Fixtures, fixture, given
 
 from gbp_webhook import cli, utils
@@ -20,7 +21,7 @@ TESTDIR = pathlib.Path(__file__).parent
 patch = mock.patch
 
 
-@fixture(lib.tmpdir, lib.environ)
+@fixture(testkit.tmpdir, lib.environ)
 def user_config(fixtures: Fixtures, filename: str = "config.toml") -> str:
     config_path = f"{fixtures.tmpdir}/{filename}"
     os.environ["GBPCLI_CONFIG"] = config_path

@@ -1,12 +1,12 @@
 # pylint: disable=missing-docstring,redefined-outer-name
 import os
 import sys
-import tempfile
 from pathlib import Path
 from types import ModuleType as Module
 from typing import Any, Sequence
 from unittest import mock
 
+import gbp_testkit.fixtures as testkit
 from unittest_fixtures import FixtureContext, Fixtures, fixture
 
 from gbp_webhook import systemd
@@ -16,13 +16,7 @@ FC = FixtureContext
 Mock = mock.Mock
 
 
-@fixture()
-def tmpdir(_: Fixtures) -> FC[str]:
-    with tempfile.TemporaryDirectory() as _tmpdir:
-        yield _tmpdir
-
-
-@fixture(tmpdir)
+@fixture(testkit.tmpdir)
 def unit_dir(fixtures: Fixtures, name: str = "unitz", create: bool = True) -> Path:
     path = Path(fixtures.tmpdir, name)
 
@@ -32,7 +26,7 @@ def unit_dir(fixtures: Fixtures, name: str = "unitz", create: bool = True) -> Pa
     return path
 
 
-@fixture(tmpdir)
+@fixture(testkit.tmpdir)
 def config_path(fixtures: Fixtures, create: bool = True) -> Path:
     path = Path(fixtures.tmpdir, ".config", WEBHOOK_CONF)
 
@@ -64,7 +58,7 @@ def argv(_: Fixtures, argv: Sequence[str] | None = None) -> FC[list[str]]:
         yield argv
 
 
-@fixture(tmpdir)
+@fixture(testkit.tmpdir)
 def home(fixtures: Fixtures, target: Any = systemd.Path) -> FC[Path]:
     with mock.patch.object(target, "home") as mock_obj:
         path = Path(fixtures.tmpdir, "home")
