@@ -6,7 +6,8 @@ import pathlib
 import unittest
 from unittest import mock
 
-from unittest_fixtures import Fixtures, given, where
+import gbp_testkit.fixtures as testkit
+from unittest_fixtures import Fixtures, Param, given, where
 
 from gbp_webhook import systemd
 from gbp_webhook.types import WEBHOOK_CONF
@@ -28,7 +29,9 @@ MOCK_ARGV = [
 ]
 
 
-@given(lib.get_unit_dir, lib.get_config_path, lib.argv)
+@given(lib.unit_dir, lib.get_config_path, lib.argv, get_unit_dir=testkit.patch)
+@where(get_unit_dir__target="gbp_webhook.systemd.get_unit_dir")
+@where(get_unit_dir__return_value=Param(lambda fixtures: fixtures.unit_dir))
 @where(argv=MOCK_ARGV)
 class InstallTests(unittest.TestCase):
     def test_without_config_file_existing(self, fixtures: Fixtures) -> None:
@@ -68,7 +71,9 @@ class InstallConfigTests(unittest.TestCase):
         )
 
 
-@given(lib.get_unit_dir)
+@given(lib.unit_dir, get_unit_dir=testkit.patch)
+@where(get_unit_dir__target="gbp_webhook.systemd.get_unit_dir")
+@where(get_unit_dir__return_value=Param(lambda fixtures: fixtures.unit_dir))
 class UninstallTests(unittest.TestCase):
     def test(self, fixtures: Fixtures) -> None:
         unit = systemd.get_unit_dir().joinpath("gbp-webhook.service")
