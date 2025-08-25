@@ -47,7 +47,7 @@ def unit_dir(fixtures: Fixtures, name: str = "unitz", create: bool = True) -> Pa
     if create:
         path.mkdir()
 
-    return Path(fixtures.tmpdir, name)
+    return path
 
 
 @fixture(tmpdir)
