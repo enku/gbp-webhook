@@ -15,13 +15,11 @@ from unittest_fixtures import Fixtures, fixture, given
 from gbp_webhook import cli, utils
 from gbp_webhook.types import NGINX_CONF
 
-from . import lib
-
 TESTDIR = pathlib.Path(__file__).parent
 patch = mock.patch
 
 
-@fixture(testkit.tmpdir, lib.environ)
+@fixture(testkit.tmpdir, testkit.environ)
 def user_config(fixtures: Fixtures, filename: str = "config.toml") -> str:
     config_path = f"{fixtures.tmpdir}/{filename}"
     os.environ["GBPCLI_CONFIG"] = config_path

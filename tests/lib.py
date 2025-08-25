@@ -12,7 +12,6 @@ from gbp_webhook import systemd
 from gbp_webhook.types import WEBHOOK_CONF
 
 FC = FixtureContext
-Mock = mock.Mock
 
 
 @fixture(testkit.tmpdir)
@@ -51,11 +50,3 @@ def home(fixtures: Fixtures, target: Any = systemd.Path) -> FC[Path]:
         mock_obj.return_value = path
 
         yield path
-
-
-@fixture()
-def environ(
-    _: Fixtures, clear: bool = True, environ: dict[str, str] | None = None
-) -> FC[None]:
-    with mock.patch.dict(os.environ, environ or {}, clear=clear):
-        yield

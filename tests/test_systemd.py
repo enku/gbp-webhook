@@ -89,7 +89,7 @@ class UninstallTests(unittest.TestCase):
         self.assertFalse(unit.exists())
 
 
-@given(lib.home, lib.environ)
+@given(lib.home, testkit.environ)
 class GetUnitDirTests(unittest.TestCase):
     def test_without_xdg_data_home(self, fixtures: Fixtures) -> None:
         path = systemd.get_unit_dir()
