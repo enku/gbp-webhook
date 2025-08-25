@@ -9,17 +9,17 @@ import unittest
 from typing import Any
 from unittest import mock
 
-from unittest_fixtures import Fixtures, given
+import gbp_testkit.fixtures as testkit
+from unittest_fixtures import Fixtures, given, where
 
 from gbp_webhook import cli, server
 from gbp_webhook.types import NGINX_CONF
 
-from . import lib
-
 Mock = mock.Mock
 
 
-@given(lib.add_process)
+@given(add_process=testkit.patch)
+@where(add_process__target="gbp_webhook.server.ChildProcess.add")
 class ServeTests(unittest.TestCase):
     # pylint: disable=protected-access
     parser = argparse.ArgumentParser()
