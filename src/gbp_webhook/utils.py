@@ -7,7 +7,9 @@ import sys
 from types import FrameType
 from typing import Any, Callable, Iterable, NoReturn, Self, Sequence, TypeAlias
 
+from gbpcli import get_user_config
 from jinja2 import Environment, PackageLoader, select_autoescape
+from yarl import URL
 
 SignalHandler: TypeAlias = Callable[[int, FrameType | None], Any]
 _env = Environment(loader=PackageLoader("gbp_webhook"), autoescape=select_autoescape())
@@ -83,3 +85,15 @@ def remove_from_lst(lst: Iterable[str], items: Iterable[str]) -> list[str]:
             pass
 
     return lst
+
+
+def build_url(machine: str, build_id: str) -> str:
+    """Return the url for the build with the given machine and build_id"""
+    config = get_user_config(os.environ.get("GBPCLI_CONFIG"))
+    base_url = config.url
+
+    assert isinstance(base_url, str)
+
+    url = URL(base_url).joinpath("machines", machine, "builds", f"{build_id}/")
+
+    return str(url)

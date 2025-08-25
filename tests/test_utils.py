@@ -9,11 +9,23 @@ import unittest
 from typing import Callable
 from unittest import mock
 
+from unittest_fixtures import Fixtures, fixture, given
+
 from gbp_webhook import cli, utils
 from gbp_webhook.types import NGINX_CONF
 
+from . import lib
+
 TESTDIR = pathlib.Path(__file__).parent
 patch = mock.patch
+
+
+@fixture(lib.tmpdir, lib.environ)
+def user_config(fixtures: Fixtures, filename: str="config.toml") -> str:
+    config_path = f"{fixtures.tmpdir}/{filename}"
+    os.environ["GBPCLI_CONFIG"] = config_path
+
+    return config_path
 
 
 class RenderTemplateTests(unittest.TestCase):
@@ -131,3 +143,14 @@ class RemoveFromLstTests(unittest.TestCase):
         args = utils.remove_from_lst(["gbp", "ls", "babette"], ["webhook", "install"])
 
         self.assertEqual(["gbp", "ls", "babette"], args)
+
+
+@given(user_config)
+class BuildURLTests(unittest.TestCase):
+    def test(self, fixtures: Fixtures) -> None:
+        with open(fixtures.user_config, "w", encoding="utf8") as fp:
+            fp.write('[gbpcli]\nurl = "http://gbp.invalid/"\n')
+
+        url = utils.build_url("git", "281")
+
+        self.assertEqual(url, "http://gbp.invalid/machines/git/builds/281/")
