@@ -5,15 +5,17 @@ import concurrent.futures as cf
 import unittest
 from unittest import mock
 
-from unittest_fixtures import Fixtures, given
+import gbp_testkit.fixtures as testkit
+from unittest_fixtures import Fixtures, given, where
 
 from gbp_webhook import app, handlers
 
 from . import lib
 
 
-@given(lib.pre_shared_key)
-@given(lib.executor)
+@given(lib.executor, pre_shared_key=testkit.patch)
+@where(pre_shared_key__target="gbp_webhook.app.PRE_SHARED_KEY")
+@where(pre_shared_key__new="key")
 class WebhookTests(unittest.TestCase):
     def test(self, fixtures: Fixtures) -> None:
         client = app.app.test_client()

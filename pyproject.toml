@@ -52,4 +52,5 @@ dev = [
     "coverage>=7.7.1",
     "nox>=2025.2.9",
     "unittest-fixtures>=1.0.0",
+    "gentoo-build-publisher[test] @ git+https://github.com/enku/gentoo-build-publisher.git@master",
 ]
