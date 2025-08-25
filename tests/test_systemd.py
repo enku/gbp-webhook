@@ -29,9 +29,12 @@ MOCK_ARGV = [
 ]
 
 
-@given(lib.unit_dir, lib.get_config_path, lib.argv, get_unit_dir=testkit.patch)
+@given(get_config_path=testkit.patch)
+@given(lib.unit_dir, lib.config_path, lib.argv, get_unit_dir=testkit.patch)
 @where(get_unit_dir__target="gbp_webhook.systemd.get_unit_dir")
 @where(get_unit_dir__return_value=Param(lambda fixtures: fixtures.unit_dir))
+@where(get_config_path__target="gbp_webhook.systemd.get_config_path")
+@where(get_config_path__return_value=Param(lambda fixtures: fixtures.config_path))
 @where(argv=MOCK_ARGV)
 class InstallTests(unittest.TestCase):
     def test_without_config_file_existing(self, fixtures: Fixtures) -> None:
@@ -55,7 +58,9 @@ class InstallTests(unittest.TestCase):
         self.assertTrue(unit.exists())
 
 
-@given(lib.get_config_path, lib.argv)
+@given(lib.config_path, lib.argv, get_config_path=testkit.patch)
+@where(get_config_path__target="gbp_webhook.systemd.get_config_path")
+@where(get_config_path__return_value=Param(lambda fixtures: fixtures.config_path))
 @where(argv=MOCK_ARGV)
 class InstallConfigTests(unittest.TestCase):
     def test(self, fixtures: Fixtures) -> None:

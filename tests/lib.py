@@ -2,7 +2,6 @@
 import os
 import sys
 from pathlib import Path
-from types import ModuleType as Module
 from typing import Any, Sequence
 from unittest import mock
 
@@ -34,13 +33,6 @@ def config_path(fixtures: Fixtures, create: bool = True) -> Path:
         path.parent.mkdir()
 
     return path
-
-
-@fixture(config_path)
-def get_config_path(fixtures: Fixtures, target: Module = systemd) -> FC[Mock]:
-    with mock.patch.object(target, "get_config_path") as mock_obj:
-        mock_obj.return_value = fixtures.config_path
-        yield mock_obj
 
 
 @fixture()
