@@ -1,8 +1,6 @@
 # pylint: disable=missing-docstring,redefined-outer-name
-import os
-import sys
 from pathlib import Path
-from typing import Any, Sequence
+from typing import Any
 from unittest import mock
 
 import gbp_testkit.fixtures as testkit
@@ -10,8 +8,6 @@ from unittest_fixtures import FixtureContext, Fixtures, fixture
 
 from gbp_webhook import systemd
 from gbp_webhook.types import WEBHOOK_CONF
-
-FC = FixtureContext
 
 
 @fixture(testkit.tmpdir)
@@ -34,16 +30,8 @@ def config_path(fixtures: Fixtures, create: bool = True) -> Path:
     return path
 
 
-@fixture()
-def argv(_: Fixtures, argv: Sequence[str] | None = None) -> FC[list[str]]:
-    argv = ["gbp", "webhook", "serve"] if argv is None else list(argv)
-
-    with mock.patch.object(sys, "argv", new=argv):
-        yield argv
-
-
 @fixture(testkit.tmpdir)
-def home(fixtures: Fixtures, target: Any = systemd.Path) -> FC[Path]:
+def home(fixtures: Fixtures, target: Any = systemd.Path) -> FixtureContext[Path]:
     with mock.patch.object(target, "home") as mock_obj:
         path = Path(fixtures.tmpdir, "home")
         path.mkdir()
