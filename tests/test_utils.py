@@ -21,7 +21,7 @@ patch = mock.patch
 
 
 @fixture(lib.tmpdir, lib.environ)
-def user_config(fixtures: Fixtures, filename: str="config.toml") -> str:
+def user_config(fixtures: Fixtures, filename: str = "config.toml") -> str:
     config_path = f"{fixtures.tmpdir}/{filename}"
     os.environ["GBPCLI_CONFIG"] = config_path
 
