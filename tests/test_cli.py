@@ -9,6 +9,7 @@ from contextlib import redirect_stdout
 from typing import Any, Callable, TypeAlias
 from unittest import mock
 
+import gbp_testkit.fixtures as testkit
 from unittest_fixtures import FixtureContext, Fixtures, fixture, given, where
 
 from gbp_webhook import cli
@@ -33,29 +34,22 @@ def parser_fixture(_: Fixtures) -> argparse.ArgumentParser:
     return parser
 
 
-@given(cli_actions, parser_fixture)
+@given(cli_actions, parser_fixture, testkit.gbpcli)
 @where(cli_actions={"serve": mock.Mock()})
 class HandlerTests(unittest.TestCase):
     def test(self, fixtures: Fixtures) -> None:
-        args = fixtures.parser.parse_args(["-p", "6000", "serve", "--allow", "0.0.0.0"])
+        fixtures.gbpcli("gbp webhook serve -p 6000 --allow 1.2.3.4")
 
-        cli.handler(args, mock.Mock(), mock.Mock())
-
-        actions = fixtures.cli_actions
-        actions["serve"].assert_called_once_with(args)
+        args = fixtures.cli_actions["serve"].call_args[0][0]
+        self.assertEqual(args.action, "serve")
+        self.assertEqual(args.port, 6000)
+        self.assertEqual(args.allow, ["1.2.3.4"])
 
     def test_list_plugins(self, fixtures: Fixtures) -> None:
-        args = fixtures.parser.parse_args(["list-plugins"])
         stdout = io.StringIO()
 
         with redirect_stdout(stdout):
-            status = cli.handler(args, mock.Mock(), mock.Mock())
+            status = fixtures.gbpcli("gbp webhook list-plugins")
 
         self.assertEqual(0, status)
         self.assertEqual("gbp_webhook.handlers:build_pulled\n", stdout.getvalue())
-
-
-class ParseArgsTests(unittest.TestCase):
-    def test(self) -> None:
-        parser = argparse.ArgumentParser()
-        cli.parse_args(parser)
