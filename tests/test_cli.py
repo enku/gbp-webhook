@@ -52,4 +52,4 @@ class HandlerTests(unittest.TestCase):
             status = fixtures.gbpcli("gbp webhook list-plugins")
 
         self.assertEqual(0, status)
-        self.assertEqual("gbp_webhook.handlers:build_pulled\n", stdout.getvalue())
+        self.assertEqual("gbp_webhook.handlers:postpull\n", stdout.getvalue())

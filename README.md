@@ -79,7 +79,7 @@ gbp-webhook server. Here's an exampl TOML config:
 laptop = { webhook = "http://10.10.10.100:5000/webhook|X-Pre-Shared-Key=our_little_secret" }
 
 [subscriptions]
-"*" = {build_pulled = ["laptop"]}
+"*" = {postpull = ["laptop"]}
 ```
 
 If you use the TOML config you won't need to restart the GBP service to read

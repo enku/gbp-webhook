@@ -17,13 +17,13 @@ def setUpModule():  # pylint: disable=invalid-name
     p.start()
 
 
-class BuildPulledTests(unittest.TestCase):
+class PostPullTests(unittest.TestCase):
     def test(self) -> None:
         notify = handlers.init_notify()
         build = {"machine": "babette", "build_id": "1554"}
-        event = {"name": "build_pulled", "machine": "babette", "data": {"build": build}}
+        event = {"name": "postpull", "machine": "babette", "data": {"build": build}}
 
-        handlers.build_pulled(event)
+        handlers.postpull(event)
 
         notify.Notification.new.assert_called_once_with(
             "babette", "babette has pushed build 1554", handlers.ICON

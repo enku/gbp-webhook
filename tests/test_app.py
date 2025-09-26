@@ -20,7 +20,7 @@ class WebhookTests(unittest.TestCase):
         client = app.app.test_client()
         headers = {"X-Pre-Shared-Key": fixtures.pre_shared_key}
         build = {"machine": "babette", "build_id": "1554"}
-        event = {"name": "build_pulled", "machine": "babette", "data": {"build": build}}
+        event = {"name": "postpull", "machine": "babette", "data": {"build": build}}
 
         response = client.post("/webhook", json=event, headers=headers)
 
@@ -29,14 +29,14 @@ class WebhookTests(unittest.TestCase):
             {"message": "Notification handled!", "status": "success"}, response.json
         )
         fixtures.executor.return_value.submit.assert_called_once_with(
-            handlers.build_pulled, event
+            handlers.postpull, event
         )
 
     def test_invalid_key(self, fixtures: Fixtures) -> None:
         client = app.app.test_client()
         headers = {"X-Pre-Shared-Key": fixtures.pre_shared_key + "xxx"}
         build = {"machine": "babette", "build_id": "1554"}
-        event = {"name": "build_pulled", "machine": "babette", "data": {"build": build}}
+        event = {"name": "postpull", "machine": "babette", "data": {"build": build}}
 
         response = client.post("/webhook", json=event, headers=headers)
 
@@ -53,9 +53,9 @@ class HandleEventTests(unittest.TestCase):
     def test_schedules_named_events(self, fixtures: Fixtures) -> None:
         executor = fixtures.executor.return_value
         executor.submit.side_effect = lambda handler, event: handler(event)
-        entry_points = [mock_entry_point("build_pulled") for _ in range(3)]
+        entry_points = [mock_entry_point("postpull") for _ in range(3)]
         entry_points.append(published := mock_entry_point("build_published"))
-        event = {"name": "build_pulled", "machine": "babette"}
+        event = {"name": "postpull", "machine": "babette"}
 
         with mock.patch.object(app, "HANDLERS", new=entry_points):
             app.handle_event(event)
@@ -71,8 +71,8 @@ class HandleEventTests(unittest.TestCase):
 @where(executor__target="gbp_webhook.app.executor")
 class ScheduleHandlerTest(unittest.TestCase):
     def test(self, fixtures: Fixtures) -> None:
-        event = {"name": "build_pulled", "machine": "babette"}
-        entry_point = mock_entry_point("build_pulled")
+        event = {"name": "postpull", "machine": "babette"}
+        entry_point = mock_entry_point("postpull")
 
         app.schedule_handler(entry_point, event)
 

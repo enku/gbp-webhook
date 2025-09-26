@@ -14,8 +14,8 @@ ICON = os.environ.get("GBP_WEBHOOK_ICON") or "package-x-generic"
 APP_ICON = os.environ.get("GBP_WEBHOOK_APP_ICON", ICON)
 
 
-def build_pulled(event: Event) -> None:
-    """build_pulled event handler"""
+def postpull(event: Event) -> None:
+    """postpull event handler"""
     title = event["machine"]
     body = create_notification_body(event["data"]["build"])
 

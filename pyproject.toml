@@ -11,7 +11,7 @@ readme = "README.md"
 license = {text = "GPL3+"}
 
 [project.entry-points."gbp_webhook.handlers"]
-build_pulled = "gbp_webhook.handlers:build_pulled"
+postpull = "gbp_webhook.handlers:postpull"
 
 [project.entry-points."gbpcli.subcommands"]
 webhook = "gbp_webhook.cli"
