@@ -5,13 +5,13 @@ import signal
 import subprocess as sp
 import sys
 from types import FrameType
-from typing import Any, Callable, Iterable, NoReturn, Self, Sequence, TypeAlias
+from typing import Any, Callable, Iterable, NoReturn, Self, Sequence
 
 from gbpcli import get_user_config
 from jinja2 import Environment, PackageLoader, select_autoescape
 from yarl import URL
 
-SignalHandler: TypeAlias = Callable[[int, FrameType | None], Any]
+type SignalHandler = Callable[[int, FrameType | None], Any]
 _env = Environment(loader=PackageLoader("gbp_webhook"), autoescape=select_autoescape())
 
 

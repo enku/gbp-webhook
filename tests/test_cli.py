@@ -6,7 +6,7 @@ import argparse
 import io
 import unittest
 from contextlib import redirect_stdout
-from typing import Any, Callable, TypeAlias
+from typing import Any, Callable
 from unittest import mock
 
 import gbp_testkit.fixtures as testkit
@@ -14,7 +14,7 @@ from unittest_fixtures import FixtureContext, Fixtures, fixture, given, where
 
 from gbp_webhook import cli
 
-Actions: TypeAlias = dict[str, Callable[[argparse.Namespace], Any]]
+type Actions = dict[str, Callable[[argparse.Namespace], Any]]
 
 
 @fixture()
