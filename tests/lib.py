@@ -4,9 +4,12 @@ from typing import Any
 from unittest import mock
 
 import gbp_testkit.fixtures as testkit
+from flask.app import Flask as FlaskApp
+from flask.testing import FlaskClient
 from unittest_fixtures import FixtureContext, Fixtures, fixture
 
 from gbp_webhook import systemd
+from gbp_webhook.app import app
 from gbp_webhook.types import WEBHOOK_CONF
 
 
@@ -38,3 +41,8 @@ def home(fixtures: Fixtures, target: Any = systemd.Path) -> FixtureContext[Path]
         mock_obj.return_value = path
 
         yield path
+
+
+@fixture()
+def client(_fixtures: Fixtures, flask_app: FlaskApp = app) -> FlaskClient:
+    return flask_app.test_client()

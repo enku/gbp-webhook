@@ -10,14 +10,16 @@ from unittest_fixtures import Fixtures, given, where
 
 from gbp_webhook import app, handlers
 
+from . import lib
 
-@given(executor=testkit.patch, pre_shared_key=testkit.patch)
+
+@given(lib.client, executor=testkit.patch, pre_shared_key=testkit.patch)
 @where(pre_shared_key__target="gbp_webhook.app.PRE_SHARED_KEY")
 @where(pre_shared_key__new="key")
 @where(executor__target="gbp_webhook.app.executor")
 class WebhookTests(unittest.TestCase):
     def test(self, fixtures: Fixtures) -> None:
-        client = app.app.test_client()
+        client = fixtures.client
         headers = {"X-Pre-Shared-Key": fixtures.pre_shared_key}
         build = {"machine": "babette", "build_id": "1554"}
         event = {"name": "postpull", "machine": "babette", "data": {"build": build}}
@@ -33,7 +35,7 @@ class WebhookTests(unittest.TestCase):
         )
 
     def test_invalid_key(self, fixtures: Fixtures) -> None:
-        client = app.app.test_client()
+        client = fixtures.client
         headers = {"X-Pre-Shared-Key": fixtures.pre_shared_key + "xxx"}
         build = {"machine": "babette", "build_id": "1554"}
         event = {"name": "postpull", "machine": "babette", "data": {"build": build}}
