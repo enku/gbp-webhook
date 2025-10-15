@@ -3,18 +3,13 @@
 # pylint: disable=missing-docstring
 
 import unittest
-from unittest import mock
+
+import gbp_testkit.fixtures as testkit
+from unittest_fixtures import Fixtures, given, where
 
 from gbp_webhook import handlers
 
-patch = mock.patch
 init_notify = handlers.init_notify
-
-
-def setUpModule():  # pylint: disable=invalid-name
-    p = patch.object(handlers, "init_notify")
-    unittest.addModuleCleanup(p.stop)
-    p.start()
 
 
 class PostPullTests(unittest.TestCase):
@@ -40,10 +35,14 @@ class CreateNotificationBodyTests(unittest.TestCase):
         )
 
 
-@patch.object(handlers.importlib, "import_module")
-@patch.object(handlers, "gi")
+@given(gi=testkit.patch, import_module=testkit.patch)
+@where(gi__target="gbp_webhook.handlers.gi")
+@where(import_module__target="gbp_webhook.handlers.importlib.import_module")
 class InitNotifyTests(unittest.TestCase):
-    def test(self, gi: mock.Mock, import_module: mock.Mock) -> None:
+    def test(self, fixtures: Fixtures) -> None:
+        gi = fixtures.gi
+        import_module = fixtures.import_module
+
         init_notify.cache_clear()
 
         notify = init_notify()
