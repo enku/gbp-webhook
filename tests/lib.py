@@ -13,6 +13,13 @@ from gbp_webhook.app import app
 from gbp_webhook.types import WEBHOOK_CONF
 
 
+def mock_entry_point(event: str) -> mock.Mock:
+    entry_point = mock.Mock()
+    entry_point.name = event
+
+    return entry_point
+
+
 @fixture(testkit.tmpdir)
 def unit_dir(fixtures: Fixtures, name: str = "unitz", create: bool = True) -> Path:
     path = Path(fixtures.tmpdir, name)

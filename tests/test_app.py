@@ -3,7 +3,6 @@
 # pylint: disable=missing-docstring
 import concurrent.futures as cf
 import unittest
-from unittest import mock
 
 import gbp_testkit.fixtures as testkit
 from unittest_fixtures import Fixtures, given, where
@@ -49,23 +48,19 @@ class WebhookTests(unittest.TestCase):
         fixtures.executor.assert_not_called()
 
 
-@given(executor=testkit.patch)
-@where(executor__target="gbp_webhook.app.executor")
+@given(eps=testkit.patch)
+@where(eps__target="gbp_webhook.app.HANDLERS")
+@where(eps__new=[lib.mock_entry_point("postpull"), lib.mock_entry_point("published")])
 class HandleEventTests(unittest.TestCase):
     def test_schedules_named_events(self, fixtures: Fixtures) -> None:
-        executor = fixtures.executor.return_value
-        executor.submit.side_effect = lambda handler, event: handler(event)
-        entry_points = [mock_entry_point("postpull") for _ in range(3)]
-        entry_points.append(published := mock_entry_point("build_published"))
         event = {"name": "postpull", "machine": "babette"}
+        postpull, published = fixtures.eps
 
-        with mock.patch.object(app, "HANDLERS", new=entry_points):
-            app.handle_event(event)
+        app.handle_event(event)
 
-        for entry_point in entry_points[:3]:
-            entry_point.load.assert_called_once_with()
-            handler = entry_point.load.return_value
-            handler.assert_called_once_with(event)
+        postpull.load.assert_called_once_with()
+        handler = postpull.load.return_value
+        handler.assert_called_once_with(event)
         published.load.assert_not_called()
 
 
@@ -74,7 +69,7 @@ class HandleEventTests(unittest.TestCase):
 class ScheduleHandlerTest(unittest.TestCase):
     def test(self, fixtures: Fixtures) -> None:
         event = {"name": "postpull", "machine": "babette"}
-        entry_point = mock_entry_point("postpull")
+        entry_point = lib.mock_entry_point("postpull")
 
         app.schedule_handler(entry_point, event)
 
@@ -89,10 +84,3 @@ class ExecutorTests(unittest.TestCase):
         executor = app.executor()
 
         self.assertIsInstance(executor, cf.ThreadPoolExecutor)
-
-
-def mock_entry_point(event: str) -> mock.Mock:
-    entry_point = mock.Mock()
-    entry_point.name = event
-
-    return entry_point
