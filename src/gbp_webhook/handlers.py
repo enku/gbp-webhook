@@ -12,6 +12,7 @@ from .types import Event
 
 ICON = os.environ.get("GBP_WEBHOOK_ICON") or "package-x-generic"
 APP_ICON = os.environ.get("GBP_WEBHOOK_APP_ICON", ICON)
+MESSAGE = "{machine} has pushed build {build_id}"
 
 
 def postpull(event: Event) -> None:
@@ -24,10 +25,9 @@ def postpull(event: Event) -> None:
 
 def create_notification_body(build: dict[str, Any]) -> str:
     """Return the notification body"""
-    machine: str = build["machine"]
-    build_id: str = build["build_id"]
+    message = os.environ.get("GBP_WEBHOOK_MESSAGE") or MESSAGE
 
-    return f"{machine} has pushed build {build_id}"
+    return message.format(machine=build["machine"], build_id=build["build_id"])
 
 
 def show_notification(title: str, body: str) -> None:

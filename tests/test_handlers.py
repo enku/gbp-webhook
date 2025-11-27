@@ -1,6 +1,6 @@
 """Tests for gbp-webhook handlers"""
 
-# pylint: disable=missing-docstring
+# pylint: disable=missing-docstring,unused-argument
 
 import unittest
 
@@ -27,12 +27,23 @@ class PostPullTests(unittest.TestCase):
         notification.show.assert_called()
 
 
+@given(testkit.environ)
+@where(environ__clear=True)
 class CreateNotificationBodyTests(unittest.TestCase):
-    def test(self) -> None:
+    def test(self, fixtures: Fixtures) -> None:
         build = {"machine": "babette", "build_id": "1554"}
         self.assertEqual(
             "babette has pushed build 1554", handlers.create_notification_body(build)
         )
+
+    def test_custom_message(self, fixtures: Fixtures) -> None:
+        environ = fixtures.environ
+        build = {"machine": "babette", "build_id": "1554"}
+
+        environ["GBP_WEBHOOK_MESSAGE"] = "test {build_id} test {machine}"
+        body = handlers.create_notification_body(build)
+
+        self.assertEqual(body, "test 1554 test babette")
 
 
 @given(gi=testkit.patch, import_module=testkit.patch)
