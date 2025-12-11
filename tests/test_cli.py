@@ -26,15 +26,7 @@ def cli_actions(
         yield mock_obj
 
 
-@fixture()
-def parser_fixture(_: Fixtures) -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser()
-    cli.parse_args(parser)
-
-    return parser
-
-
-@given(cli_actions, parser_fixture, testkit.gbpcli)
+@given(cli_actions, testkit.gbpcli)
 @where(cli_actions={"serve": mock.Mock()})
 class HandlerTests(unittest.TestCase):
     def test(self, fixtures: Fixtures) -> None:
