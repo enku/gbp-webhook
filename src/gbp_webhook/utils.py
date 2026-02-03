@@ -52,7 +52,7 @@ class ChildProcess:
         self._children.append(sp.Popen(args))
         return self._children[-1]
 
-    def shutdown(self, *_args: Any) -> NoReturn:
+    def kill(self, *_args: Any) -> NoReturn:
         """Kill children and exit"""
         for child in self._children:
             child.kill()
@@ -62,7 +62,7 @@ class ChildProcess:
     def __enter__(self) -> Self:
         for signalnum in self.signals:
             self.orig_handlers.append(signal.getsignal(signalnum))
-            signal.signal(signalnum, self.shutdown)
+            signal.signal(signalnum, self.kill)
 
         return self
 
