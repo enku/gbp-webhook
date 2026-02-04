@@ -1,4 +1,5 @@
 # pylint: disable=missing-docstring,redefined-outer-name
+from importlib.metadata import EntryPoint
 from pathlib import Path
 from typing import Any
 from unittest import mock
@@ -14,7 +15,7 @@ from gbp_webhook.types import WEBHOOK_CONF
 
 
 def mock_entry_point(event: str) -> mock.Mock:
-    entry_point = mock.Mock()
+    entry_point = mock.Mock(spec=EntryPoint)
     entry_point.name = event
 
     return entry_point
