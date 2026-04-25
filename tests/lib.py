@@ -45,7 +45,6 @@ def config_path(fixtures: Fixtures, create: bool = True) -> Path:
 def home(fixtures: Fixtures, target: Any = systemd.Path) -> FixtureContext[Path]:
     with mock.patch.object(target, "home") as mock_obj:
         mock_obj.return_value = path = Path(fixtures.tmpdir, "home")
-        mock_obj.return_value = path
 
         yield path
 
