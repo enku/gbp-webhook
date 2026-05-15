@@ -23,11 +23,11 @@ def webhook() -> tuple[Response, int]:
     """Webhook responder"""
     headers = request.headers
 
-    if headers.get(PSK_HEADER) == PRE_SHARED_KEY:
-        handle_event(cast(Event, request.json))
-        return response("success", "Notification handled!"), 200
+    if headers.get(PSK_HEADER) != PRE_SHARED_KEY:
+        return response("error", "Invalid pre-shared key!"), 403
 
-    return response("error", "Invalid pre-shared key!"), 403
+    handle_event(cast(Event, request.json))
+    return response("success", "Notification handled!"), 200
 
 
 def handle_event(event: Event) -> None:
